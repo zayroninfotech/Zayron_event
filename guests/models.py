@@ -28,12 +28,14 @@ class GuestUpload(models.Model):
         return f'Guest upload for {self.event.name} at {self.created_at:%Y-%m-%d %H:%M}'
 
     def delete_biometric_data(self):
-        """Data-minimization: wipe selfie and encoding after matching."""
+        """Data-minimization: wipe selfie and encoding after matching (SQLite + MongoDB)."""
+        import mongo_store
         if self.selfie:
             self.selfie.delete(save=False)
             self.selfie = None
         self.face_encoding = []
         self.save(update_fields=['selfie', 'face_encoding'])
+        mongo_store.delete_guest_biometric(self.pk)
 
 
 class PhotoMatch(models.Model):

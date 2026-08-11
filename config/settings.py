@@ -5,7 +5,7 @@ import environ
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env(
-    DEBUG=(bool, False),
+    DEBUG=(bool, True),
     ALLOWED_HOSTS=(list, ['localhost', '127.0.0.1']),
     FACE_MATCH_TOLERANCE=(float, 0.5),
 )
@@ -64,20 +64,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# MongoDB via djongo
+# SQLite handles Django system tables (auth, sessions, admin, celery).
+# MongoDB (via pymongo) stores event/photo/guest data and face encodings.
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': env('MONGO_DB', default='event_photo_hub'),
-        'CLIENT': {
-            'host': env('MONGO_HOST', default='localhost'),
-            'port': env.int('MONGO_PORT', default=27017),
-            'username': env('MONGO_USER', default=''),
-            'password': env('MONGO_PASSWORD', default=''),
-            'authSource': env('MONGO_DB', default='event_photo_hub'),
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── MongoDB connection (used directly via pymongo through mongo_store.py) ──
+MONGO_HOST = env('MONGO_HOST', default='localhost')
+MONGO_PORT = env.int('MONGO_PORT', default=27017)
+MONGO_DB = env('MONGO_DB', default='event_photo_hub')
+MONGO_USER = env('MONGO_USER', default='')
+MONGO_PASSWORD = env('MONGO_PASSWORD', default='')
+MONGO_AUTH_SOURCE = env('MONGO_AUTH_SOURCE', default='admin')
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -96,10 +100,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL = env('MEDIA_URL', default='/media/')
-MEDIA_ROOT = Path(env('MEDIA_ROOT', default=str(BASE_DIR / 'media')))
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Celery
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
