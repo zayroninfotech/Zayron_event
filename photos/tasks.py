@@ -1,16 +1,26 @@
 import logging
-import io
+import cv2
+import numpy as np
 from celery import shared_task
-from django.conf import settings
-from PIL import Image
-from django.core.files.base import ContentFile
 
 logger = logging.getLogger(__name__)
+
+_face_app = None
+
+
+def _get_face_app():
+    global _face_app
+    if _face_app is None:
+        import insightface
+        from insightface.app import FaceAnalysis
+        _face_app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
+        _face_app.prepare(ctx_id=-1, det_size=(640, 640))
+    return _face_app
 
 
 @shared_task(bind=True, max_retries=2, default_retry_delay=60)
 def process_event_photo(self, photo_id: int):
-    """Detect faces in an event photo; store encodings in MongoDB."""
+    """Detect faces in an event photo using ArcFace; store embeddings in MongoDB."""
     from photos.models import EventPhoto
     import mongo_store
 
@@ -19,20 +29,41 @@ def process_event_photo(self, photo_id: int):
     except EventPhoto.DoesNotExist:
         return
 
-    # Skip if already processed
     if photo.processed:
         return
 
     try:
-        import face_recognition
-        img = face_recognition.load_image_file(photo.image.path)
-        encodings = face_recognition.face_encodings(img)
-        encoding_list = [enc.tolist() for enc in encodings]
-        face_count = len(encodings)
+        import insightface  # noqa — check available
     except ImportError:
-        logger.warning('face_recognition not installed — marking photo %s as processed', photo_id)
-        encoding_list = []
-        face_count = 0
+        logger.warning('insightface not installed — marking photo %s as processed', photo_id)
+        mongo_store.upsert_photo(photo_id, {
+            'event_id': photo.event_id,
+            'image_path': photo.image.name,
+            'face_encodings': [],
+            'face_count': 0,
+            'processed': True,
+        })
+        photo.face_count = 0
+        photo.processed = True
+        photo.save(update_fields=['face_count', 'processed'])
+        return
+
+    try:
+        app = _get_face_app()
+        img = cv2.imread(photo.image.path)
+        if img is None:
+            raise ValueError(f'Cannot read image: {photo.image.path}')
+
+        # Resize large images to max 1920px to speed up detection
+        h, w = img.shape[:2]
+        if max(h, w) > 1920:
+            scale = 1920 / max(h, w)
+            img = cv2.resize(img, (int(w * scale), int(h * scale)))
+
+        faces = app.get(img)
+        embeddings = [face.embedding.tolist() for face in faces]
+        face_count = len(faces)
+
     except Exception as exc:
         logger.exception('Error processing photo %s', photo_id)
         raise self.retry(exc=exc)
@@ -40,7 +71,7 @@ def process_event_photo(self, photo_id: int):
     mongo_store.upsert_photo(photo_id, {
         'event_id': photo.event_id,
         'image_path': photo.image.name,
-        'face_encodings': encoding_list,
+        'face_encodings': embeddings,
         'face_count': face_count,
         'processed': True,
     })

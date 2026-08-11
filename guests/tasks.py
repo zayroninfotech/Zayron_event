@@ -1,29 +1,49 @@
 import logging
+import cv2
 import numpy as np
 from celery import shared_task
 
 logger = logging.getLogger(__name__)
 
+_face_app = None
+
+SIMILARITY_THRESHOLD = 0.40   # cosine similarity — higher = stricter match
+
+
+def _get_face_app():
+    global _face_app
+    if _face_app is None:
+        from insightface.app import FaceAnalysis
+        _face_app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
+        _face_app.prepare(ctx_id=-1, det_size=(640, 640))
+    return _face_app
+
+
+def _cosine_similarity(a, b):
+    a, b = np.array(a), np.array(b)
+    denom = (np.linalg.norm(a) * np.linalg.norm(b))
+    if denom == 0:
+        return 0.0
+    return float(np.dot(a, b) / denom)
+
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=10)
 def match_guest_faces(self, guest_upload_id: int):
     """
-    1. Generate face encoding from guest selfie.
-    2. Compare against all event photo encodings stored in MongoDB.
-    3. Save PhotoMatch records in both SQLite and MongoDB.
+    1. Generate ArcFace embedding from guest selfie.
+    2. Compare against all event photo embeddings stored in MongoDB.
+    3. Save PhotoMatch records for matches above threshold.
     """
     try:
-        import face_recognition
+        import insightface  # noqa
+        HAS_INSIGHTFACE = True
     except ImportError:
-        logger.error('face_recognition not installed')
-        return
+        logger.warning('insightface not installed — returning all event photos as fallback')
+        HAS_INSIGHTFACE = False
 
     from guests.models import GuestUpload, PhotoMatch
     from photos.models import EventPhoto
-    from django.conf import settings
     import mongo_store
-
-    tolerance = getattr(settings, 'FACE_MATCH_TOLERANCE', 0.5)
 
     try:
         upload = GuestUpload.objects.get(pk=guest_upload_id)
@@ -34,52 +54,69 @@ def match_guest_faces(self, guest_upload_id: int):
     upload.save(update_fields=['status'])
 
     try:
-        selfie_img = face_recognition.load_image_file(upload.selfie.path)
-        selfie_encodings = face_recognition.face_encodings(selfie_img)
+        # ── Fallback: no insightface → show all event photos ──────────────
+        if not HAS_INSIGHTFACE:
+            photos = EventPhoto.objects.filter(event_id=upload.event_id)
+            for photo in photos:
+                PhotoMatch.objects.get_or_create(
+                    guest_upload=upload,
+                    photo=photo,
+                    defaults={'confidence': 0.0},
+                )
+            upload.status = 'done'
+            upload.save(update_fields=['status'])
+            logger.info('Guest %s: fallback — %d photo(s)', guest_upload_id, photos.count())
+            return
 
-        if not selfie_encodings:
+        # ── Load selfie and get ArcFace embedding ─────────────────────────
+        app = _get_face_app()
+        selfie_img = cv2.imread(upload.selfie.path)
+        if selfie_img is None:
+            raise ValueError('Cannot read selfie image')
+
+        faces = app.get(selfie_img)
+        if not faces:
             upload.status = 'no_face'
             upload.save(update_fields=['status'])
             mongo_store.upsert_guest(guest_upload_id, {'status': 'no_face', 'face_encoding': []})
             return
 
-        guest_enc = selfie_encodings[0]
+        # Use the largest detected face (most prominent)
+        guest_face = max(faces, key=lambda f: (f.bbox[2] - f.bbox[0]) * (f.bbox[3] - f.bbox[1]))
+        guest_emb = guest_face.embedding.tolist()
 
-        # Persist guest encoding to MongoDB
         mongo_store.upsert_guest(guest_upload_id, {
             'event_id': upload.event_id,
-            'face_encoding': guest_enc.tolist(),
+            'face_encoding': guest_emb,
             'status': 'processing',
         })
 
-        # Load all event photo encodings from MongoDB
+        # ── Compare against all event photo embeddings ─────────────────────
         photo_docs = mongo_store.get_event_photo_encodings(upload.event_id)
-
         matches_created = 0
+
         for doc in photo_docs:
             if not doc.get('face_encodings'):
                 continue
 
-            known_encs = [np.array(e) for e in doc['face_encodings']]
-            distances = face_recognition.face_distance(known_encs, guest_enc)
+            best_sim = max(
+                _cosine_similarity(guest_emb, enc)
+                for enc in doc['face_encodings']
+            )
 
-            if any(d <= tolerance for d in distances):
-                best = float(min(distances))
+            if best_sim >= SIMILARITY_THRESHOLD:
                 photo_id = doc['photo_id']
-
-                # SQLite record for Django ORM queries
                 try:
                     photo = EventPhoto.objects.get(pk=photo_id)
                     PhotoMatch.objects.get_or_create(
                         guest_upload=upload,
                         photo=photo,
-                        defaults={'confidence': best},
+                        defaults={'confidence': best_sim},
                     )
                 except EventPhoto.DoesNotExist:
                     pass
 
-                # MongoDB record
-                mongo_store.insert_match(guest_upload_id, photo_id, best)
+                mongo_store.insert_match(guest_upload_id, photo_id, best_sim)
                 matches_created += 1
 
         upload.status = 'done'
