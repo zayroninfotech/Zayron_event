@@ -887,38 +887,7 @@
 const SLUG       = '{{ event.slug }}';
 const UPLOAD_URL = '{% url "bulk_upload" event.slug %}';
 const CSRF       = '{{ csrf_token }}';
-const CHUNK_SIZE = 20;   // smaller batches so each request is faster
-const MAX_PX     = 1920; // max width or height before compressing
-const QUALITY    = 0.82; // JPEG quality
-
-// ── Client-side image compression ──
-function compressImage(file) {
-  return new Promise(resolve => {
-    // Skip tiny files or non-JPEG (PNG, WEBP kept but still resized)
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      let { width, height } = img;
-      if (width <= MAX_PX && height <= MAX_PX && file.size < 2 * 1024 * 1024) {
-        // already small enough
-        resolve(file);
-        return;
-      }
-      const scale = Math.min(MAX_PX / width, MAX_PX / height, 1);
-      const canvas = document.createElement('canvas');
-      canvas.width  = Math.round(width  * scale);
-      canvas.height = Math.round(height * scale);
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(blob => {
-        resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
-      }, 'image/jpeg', QUALITY);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
-    img.src = url;
-  });
-}
+const CHUNK_SIZE = 5; // 5 photos per batch to handle large files reliably
 
 // ── Download with spinner (fetch → blob → save) ──
 function extractFilename(res, fallback) {
@@ -1028,28 +997,13 @@ async function startUpload(files) {
   const overlayFill   = document.getElementById('overlayFill');
   const overlayPct    = document.getElementById('overlayPct');
   const overlayBatch  = document.getElementById('overlayBatch');
-  overlay.style.display   = 'flex';
-  overlayLabel.textContent = `Compressing ${total} photos…`;
-  overlayCtr.textContent   = 'Please wait…';
-  overlayBatch.textContent = 'Reducing file sizes for faster upload';
-
-  // Compress all files first (parallel, max 4 at a time)
-  const compressed = [];
-  for (let i = 0; i < total; i += 4) {
-    const batch = files.slice(i, i + 4);
-    const results = await Promise.all(batch.map(compressImage));
-    compressed.push(...results);
-    const pct = Math.round((i + batch.length) / total * 100);
-    overlayFill.style.width = (pct / 2) + '%'; // first 50% = compression
-    overlayPct.textContent  = pct + '% compressed';
-    overlayCtr.textContent  = `${i + batch.length} of ${total} compressed`;
-  }
-
-  overlayLabel.textContent = `Uploading ${total} photos…`;
+  overlay.style.display    = 'flex';
+  overlayLabel.textContent = `Uploading ${total} photo${total !== 1 ? 's' : ''}…`;
+  overlayCtr.textContent   = `0 of ${total} photos`;
   overlayBatch.textContent = '';
 
   const chunks = [];
-  for (let i = 0; i < total; i += CHUNK_SIZE) chunks.push(compressed.slice(i, i + CHUNK_SIZE));
+  for (let i = 0; i < total; i += CHUNK_SIZE) chunks.push(files.slice(i, i + CHUNK_SIZE));
 
   const statusBox = document.getElementById('uploadStatus');
   const label     = document.getElementById('uploadLabel');
@@ -1060,10 +1014,8 @@ async function startUpload(files) {
     const pct = ttl > 0 ? Math.round(done / ttl * 100) : 0;
     fill.style.width    = pct + '%';
     counter.textContent = `${done} / ${ttl}`;
-    // overlay uses 50–100% range (first 50% was compression)
-    const overlayPctVal = 50 + Math.round(pct / 2);
-    overlayFill.style.width = overlayPctVal + '%';
-    overlayPct.textContent  = overlayPctVal + '%';
+    overlayFill.style.width = pct + '%';
+    overlayPct.textContent  = pct + '%';
     overlayCtr.textContent  = `${done} of ${ttl} photos uploaded`;
     overlayBatch.textContent = batchTotal > 1 ? `Batch ${batchIdx + 1} of ${batchTotal}` : '';
   }
