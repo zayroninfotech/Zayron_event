@@ -13,7 +13,11 @@ from .tasks import process_event_photo
 def bulk_upload(request, slug):
     event = get_object_or_404(Event, slug=slug, created_by=request.user)
     files = request.FILES.getlist('photos')
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     if not files:
+        if is_ajax:
+            return JsonResponse({'error': 'No files provided.'}, status=400)
         messages.warning(request, 'No files selected.')
         return redirect('event_detail', slug=slug)
 
@@ -22,6 +26,9 @@ def bulk_upload(request, slug):
         photo = EventPhoto.objects.create(event=event, image=f)
         process_event_photo.delay(photo.pk)
         created.append(photo.pk)
+
+    if is_ajax:
+        return JsonResponse({'uploaded': len(created)})
 
     messages.success(request, f'{len(created)} photo(s) uploaded and queued for processing.')
     return redirect('event_detail', slug=slug)
