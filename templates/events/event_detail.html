@@ -852,6 +852,34 @@
   </div>
 </div>
 
+<!-- Upload Overlay Loader -->
+<div id="uploadOverlay" style="
+  display:none; position:fixed; inset:0; z-index:9998;
+  background:rgba(10,15,35,.82); backdrop-filter:blur(6px);
+  flex-direction:column; align-items:center; justify-content:center; gap:20px;
+">
+  <div style="
+    background:#fff; border-radius:20px; padding:36px 40px;
+    text-align:center; width:min(420px,90vw);
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+  ">
+    <div style="font-size:2.5rem; margin-bottom:12px;">📤</div>
+    <div style="font-size:1rem; font-weight:700; color:#172033; margin-bottom:4px;" id="overlayLabel">Uploading photos…</div>
+    <div style="font-size:.82rem; color:#667085; margin-bottom:20px;" id="overlayCounter">0 / 0</div>
+
+    <!-- Big progress bar -->
+    <div style="height:12px; border-radius:99px; background:#E7E9F0; overflow:hidden; margin-bottom:10px;">
+      <div id="overlayFill" style="
+        height:100%; border-radius:99px; width:0%;
+        background:linear-gradient(90deg,#635BEB,#3B82F6);
+        transition:width .3s;
+      "></div>
+    </div>
+    <div style="font-size:.78rem; color:#98A2B3;" id="overlayPct">0%</div>
+    <div style="font-size:.75rem; color:#98A2B3; margin-top:8px;" id="overlayBatch"></div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -969,15 +997,39 @@ async function startUpload(files) {
   const counter   = document.getElementById('uploadCounter');
   const fill      = document.getElementById('uploadFill');
 
+  // Overlay elements
+  const overlay       = document.getElementById('uploadOverlay');
+  const overlayLabel  = document.getElementById('overlayLabel');
+  const overlayCtr    = document.getElementById('overlayCounter');
+  const overlayFill   = document.getElementById('overlayFill');
+  const overlayPct    = document.getElementById('overlayPct');
+  const overlayBatch  = document.getElementById('overlayBatch');
+
+  function setProgress(done, ttl, batchIdx, batchTotal) {
+    const pct = ttl > 0 ? Math.round(done / ttl * 100) : 0;
+    // small bar
+    fill.style.width    = pct + '%';
+    counter.textContent = `${done} / ${ttl}`;
+    // overlay
+    overlayFill.style.width = pct + '%';
+    overlayPct.textContent  = pct + '%';
+    overlayCtr.textContent  = `${done} of ${ttl} photos`;
+    if (batchTotal > 1)
+      overlayBatch.textContent = `Batch ${batchIdx + 1} of ${batchTotal}`;
+    else
+      overlayBatch.textContent = '';
+  }
+
   statusBox.style.display = 'block';
+  overlay.style.display   = 'flex';
   dropZone.style.pointerEvents = 'none';
   dropZone.style.opacity = '.45';
+  overlayLabel.textContent = `Uploading ${total} photo${total !== 1 ? 's' : ''}…`;
 
   let uploaded = 0;
   for (let i = 0; i < chunks.length; i++) {
-    label.textContent   = chunks.length > 1 ? `Uploading batch ${i + 1} of ${chunks.length}…` : 'Uploading…';
-    counter.textContent = `${uploaded} / ${total}`;
-    fill.style.width    = Math.round(uploaded / total * 100) + '%';
+    label.textContent = chunks.length > 1 ? `Uploading batch ${i + 1} of ${chunks.length}…` : 'Uploading…';
+    setProgress(uploaded, total, i, chunks.length);
 
     const fd = new FormData();
     chunks[i].forEach(f => fd.append('photos', f));
@@ -990,22 +1042,27 @@ async function startUpload(files) {
       if (!res.ok) throw new Error(`Server error on batch ${i + 1}`);
       uploaded += (await res.json()).uploaded;
     } catch (err) {
-      label.textContent = `Upload error: ${err.message}`;
+      label.textContent        = `Upload error: ${err.message}`;
+      overlayLabel.textContent = `Error: ${err.message}`;
+      overlayFill.style.background = '#EF4444';
       dropZone.style.pointerEvents = '';
       dropZone.style.opacity = '';
+      setTimeout(() => { overlay.style.display = 'none'; }, 3000);
       return;
     }
 
-    counter.textContent = `${uploaded} / ${total}`;
-    fill.style.width    = Math.round(uploaded / total * 100) + '%';
+    setProgress(uploaded, total, i, chunks.length);
   }
 
-  label.textContent = `${uploaded} photo${uploaded !== 1 ? 's' : ''} uploaded`;
-  fill.style.background = 'var(--zs-success)';
+  label.textContent        = `${uploaded} photo${uploaded !== 1 ? 's' : ''} uploaded`;
+  overlayLabel.textContent = `✅ ${uploaded} photo${uploaded !== 1 ? 's' : ''} uploaded!`;
+  overlayBatch.textContent = 'Refreshing…';
+  overlayFill.style.background = '#22C55E';
+  fill.style.background        = 'var(--zs-success)';
   dropZone.style.pointerEvents = '';
-  dropZone.style.opacity = '';
+  dropZone.style.opacity       = '';
 
-  setTimeout(() => location.reload(), 800);
+  setTimeout(() => location.reload(), 1000);
 }
 
 // ── Processing poll ──
