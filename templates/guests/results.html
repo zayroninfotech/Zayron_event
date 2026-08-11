@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Photos — {{ event.name }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background: #111; color: #fff; min-height: 100vh; }
+    .hero { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 1.5rem 1rem; text-align: center; }
+    .photo-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+    .photo-card { position: relative; }
+    .dl-btn { position: absolute; bottom: 6px; right: 6px; opacity: .85; }
+    .spinner-wrap { min-height: 40vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body>
+<div class="hero mb-4">
+  <p class="text-uppercase text-info small mb-1">📸 Event Photo Hub</p>
+  <h4 class="fw-bold mb-0">{{ event.name }}</h4>
+</div>
+
+<div class="container" style="max-width:600px">
+
+{% if upload.status == 'done' %}
+  {% if matches %}
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <h5 class="mb-0">
+        <i class="bi bi-check-circle-fill text-success"></i>
+        {{ matches|length }} photo{{ matches|length|pluralize }} found!
+      </h5>
+      <a href="{% url 'download_zip' event.slug upload.pk %}" class="btn btn-success btn-sm">
+        <i class="bi bi-file-zip"></i> Download All (ZIP)
+      </a>
+    </div>
+    <div class="row g-2">
+      {% for match in matches %}
+      <div class="col-6 col-sm-4">
+        <div class="photo-card">
+          {% if match.photo.thumbnail %}
+            <img src="{{ match.photo.thumbnail.url }}" alt="Photo" loading="lazy">
+          {% else %}
+            <img src="{{ match.photo.image.url }}" alt="Photo" loading="lazy">
+          {% endif %}
+          <a href="{% url 'download_photo' event.slug match.photo.pk %}"
+             class="btn btn-sm btn-dark dl-btn" title="Download">
+            <i class="bi bi-download"></i>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <i class="bi bi-emoji-frown display-3 text-warning"></i>
+      <h5 class="mt-3">No matches found</h5>
+      <p class="text-muted">We couldn't find your face in the event photos. Make sure your selfie shows your face clearly.</p>
+      <a href="{% url 'guest_upload' event.slug %}" class="btn btn-outline-light mt-2">Try again</a>
+    </div>
+  {% endif %}
+
+{% elif upload.status == 'failed' %}
+  <div class="text-center py-5">
+    <i class="bi bi-x-circle display-3 text-danger"></i>
+    <h5 class="mt-3">Something went wrong</h5>
+    <p class="text-muted">We couldn't process your selfie. Please try again.</p>
+    <a href="{% url 'guest_upload' event.slug %}" class="btn btn-outline-light mt-2">Try again</a>
+  </div>
+
+{% else %}
+  <!-- Pending / processing — poll -->
+  <div class="spinner-wrap text-center" id="waitScreen">
+    <div class="spinner-border text-info mb-3" style="width:3rem;height:3rem;"></div>
+    <h5>Searching the event photos…</h5>
+    <p class="text-muted small">This usually takes 10–30 seconds depending on how many photos were taken.</p>
+  </div>
+{% endif %}
+
+</div>
+
+{% if upload.status not in 'done,failed' %}
+<script>
+(function poll(){
+  fetch('/event/api/status/{{ upload.pk }}/')
+    .then(r => r.json())
+    .then(data => {
+      if(data.status === 'done' || data.status === 'failed'){
+        location.reload();
+      } else {
+        setTimeout(poll, 3000);
+      }
+    })
+    .catch(() => setTimeout(poll, 5000));
+})();
+</script>
+{% endif %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

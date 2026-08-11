@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find My Photos — {{ event.name }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #111; color: #fff; min-height: 100vh; }
+    .hero { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 2rem 1rem; text-align: center; }
+    .selfie-preview { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 3px solid #0d6efd; display: none; margin: 0 auto 1rem; }
+    .upload-zone { border: 2px dashed #555; border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; transition: border-color .2s; }
+    .upload-zone:hover, .upload-zone.drag { border-color: #0d6efd; }
+    .consent-box { background: #1c1c2e; border-radius: 8px; padding: 1rem; font-size: .85rem; color: #adb5bd; }
+    .btn-capture { font-size: 1.1rem; padding: .75rem 2rem; border-radius: 50px; }
+  </style>
+</head>
+<body>
+<div class="hero mb-4">
+  <p class="text-uppercase text-info small mb-1 letter-spacing-1">📸 Event Photo Hub</p>
+  <h2 class="fw-bold">{{ event.name }}</h2>
+  <p class="text-muted">{{ event.event_date }}</p>
+  <p class="lead">Find all your photos from this event — just take a quick selfie!</p>
+</div>
+
+<div class="container" style="max-width:480px">
+  <form method="post" enctype="multipart/form-data" id="uploadForm">
+    {% csrf_token %}
+
+    <div class="upload-zone mb-3" id="uploadZone" onclick="document.getElementById('id_selfie').click()">
+      <img src="" alt="Preview" class="selfie-preview" id="preview">
+      <i class="bi bi-camera-fill display-5 text-info" id="camIcon"></i>
+      <p class="mt-2 mb-0" id="zoneText">Tap to take or choose a selfie</p>
+    </div>
+    <input type="file" name="selfie" id="id_selfie" accept="image/*" capture="user"
+           class="d-none" required onchange="previewSelfie(this)">
+    {% if form.selfie.errors %}
+      <div class="text-danger small mb-2">{{ form.selfie.errors }}</div>
+    {% endif %}
+
+    <div class="mb-3">
+      <input type="text" name="name" class="form-control bg-dark border-secondary text-white"
+             placeholder="Your name (optional)" value="{{ form.name.value|default:'' }}">
+    </div>
+    <div class="mb-3">
+      <input type="text" name="phone" class="form-control bg-dark border-secondary text-white"
+             placeholder="Phone / WhatsApp (optional)" value="{{ form.phone.value|default:'' }}">
+    </div>
+
+    <div class="consent-box mb-3">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="consent" id="id_consent" required>
+        <label class="form-check-label" for="id_consent">
+          <strong class="text-warning">Privacy notice:</strong>
+          I understand my selfie and face data will be used <em>only</em> to find my photos from
+          <strong>{{ event.name }}</strong>. My data will not be shared with third parties and
+          can be deleted upon request.
+        </label>
+      </div>
+      {% if form.consent.errors %}
+        <div class="text-danger small mt-1">{{ form.consent.errors }}</div>
+      {% endif %}
+    </div>
+
+    <button class="btn btn-primary btn-capture w-100" type="submit" id="submitBtn">
+      <i class="bi bi-search-heart"></i> Find My Photos
+    </button>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<script>
+function previewSelfie(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const preview = document.getElementById('preview');
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+      document.getElementById('camIcon').style.display = 'none';
+      document.getElementById('zoneText').textContent = 'Tap to change';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+document.getElementById('uploadForm').addEventListener('submit', function(){
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Searching…';
+});
+</script>
+</body>
+</html>
