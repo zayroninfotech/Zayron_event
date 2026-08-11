@@ -12,8 +12,7 @@ from photos.models import EventPhoto
 
 
 def guest_landing(request, slug):
-    event = get_object_or_404(Event, slug=slug)
-    return render(request, 'guests/landing.html', {'event': event})
+    return redirect('guest_upload', slug=slug)
 
 
 def guest_upload(request, slug):
