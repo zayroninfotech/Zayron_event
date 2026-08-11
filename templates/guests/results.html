@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,31 +13,52 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --violet:      #6C5CE7;
-      --violet-dark: #5A4BD1;
-      --violet-lt:   #EDE9FF;
+      --violet:      #635BEB;
+      --violet-dark: #4F46D6;
+      --violet-2:    #7C6CF6;
+      --violet-lt:   #EEEAFE;
       --blue:        #3B82F6;
-      --text:        #101828;
-      --muted:       #667085;
-      --subtle:      #98A2B3;
+      --text:        #172033;
+      --muted:       rgba(23,32,51,.68);
+      --subtle:      rgba(23,32,51,.46);
       --border:      #E7E9F0;
       --bg:          #F7F8FC;
       --surface:     #FFFFFF;
       --success:     #22C55E;
+
+      /* Glass system */
+      --glass-surface: rgba(255,255,255,.44);
+      --glass-strong:  rgba(255,255,255,.64);
+      --glass-subtle:  rgba(255,255,255,.26);
+      --glass-border:  rgba(255,255,255,.60);
+      --glass-blur:    26px;
     }
 
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: var(--surface);
       color: var(--text);
       min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(124,108,246,.14), transparent 42%),
+        linear-gradient(180deg, rgba(253,246,236,.62) 0%, rgba(244,239,253,.68) 45%, rgba(236,233,252,.74) 100%),
+        url("{% static 'img/hero-bg.jpg' %}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      text-shadow: 0 1px 2px rgba(255,255,255,.35);
     }
 
     /* ── Header ── */
     .zs-header {
       padding: 14px 20px;
       display: flex; align-items: center; gap: 8px;
-      border-bottom: 1px solid var(--border);
+      background: var(--glass-strong);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     .zs-logo-icon {
       width: 30px; height: 30px; border-radius: 8px;
@@ -78,7 +100,9 @@
     .scan-center {
       position: absolute; inset: 22px;
       border-radius: 50%;
-      background: var(--violet-lt);
+      background: var(--glass-strong);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
       border: 1.5px solid var(--violet);
       display: grid; place-items: center;
       font-size: 1.6rem;
@@ -108,8 +132,8 @@
     .step-icon {
       width: 26px; height: 26px; min-width: 26px;
       border-radius: 50%;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
+      background: var(--glass-surface);
+      border: 1.5px solid var(--glass-border);
       display: grid; place-items: center;
       font-size: .72rem;
       transition: all .35s;
@@ -145,7 +169,7 @@
     .btn-zip:hover { background: var(--violet-dark); color: #fff; }
 
     .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .6rem; }
-    .photo-card { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .photo-card { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border); background: var(--surface); }
     .photo-card img {
       width: 100%; aspect-ratio: 1; object-fit: cover;
       display: block; transition: transform .2s;
@@ -174,8 +198,10 @@
     .state-icon-wrap {
       width: 68px; height: 68px;
       border-radius: 20px;
-      background: var(--bg);
-      border: 1px solid var(--border);
+      background: var(--glass-surface);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
       display: grid; place-items: center;
       font-size: 1.8rem;
       color: var(--subtle);
@@ -194,8 +220,10 @@
     .btn-retry:hover { background: var(--violet-dark); color: #fff; }
 
     .tip-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
+      background: var(--glass-surface);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
       border-radius: 14px;
       padding: 1.1rem 1.3rem;
       max-width: 300px;

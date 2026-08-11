@@ -13,8 +13,10 @@
   .reg-card {
     width: 100%;
     max-width: 440px;
-    background: var(--zs-surface);
-    border: 1px solid var(--zs-border);
+    background: var(--glass-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--zs-radius-lg);
     box-shadow: var(--zs-shadow-md);
     padding: 36px 32px;
@@ -54,15 +56,15 @@
   .reg-card .form-control {
     padding: 10px 12px;
     font-size: .9rem;
-    border-color: var(--zs-border);
+    border-color: var(--glass-border);
     border-radius: 8px;
-    background: var(--zs-bg);
+    background: rgba(255,255,255,.55);
     color: var(--zs-text);
   }
   .reg-card .form-control:focus {
     border-color: var(--zs-violet);
-    box-shadow: 0 0 0 3px rgba(108,92,231,.12);
-    background: var(--zs-surface);
+    box-shadow: 0 0 0 3px rgba(99,91,235,.15);
+    background: rgba(255,255,255,.85);
   }
   .reg-card .form-text {
     font-size: .76rem;
@@ -91,7 +93,7 @@
 
   .reg-divider {
     border: none;
-    border-top: 1px solid var(--zs-border);
+    border-top: 1px solid var(--glass-border);
     margin: 20px 0;
   }
   .reg-signin {

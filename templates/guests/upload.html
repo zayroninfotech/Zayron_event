@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,31 +13,52 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --violet:      #6C5CE7;
-      --violet-dark: #5A4BD1;
-      --violet-lt:   #EDE9FF;
+      --violet:      #635BEB;
+      --violet-dark: #4F46D6;
+      --violet-2:    #7C6CF6;
+      --violet-lt:   #EEEAFE;
       --blue:        #3B82F6;
-      --text:        #101828;
-      --muted:       #667085;
-      --subtle:      #98A2B3;
+      --text:        #172033;
+      --muted:       rgba(23,32,51,.68);
+      --subtle:      rgba(23,32,51,.46);
       --border:      #E7E9F0;
       --bg:          #F7F8FC;
       --surface:     #FFFFFF;
       --danger:      #EF4444;
+
+      /* Glass system */
+      --glass-surface: rgba(255,255,255,.44);
+      --glass-strong:  rgba(255,255,255,.64);
+      --glass-subtle:  rgba(255,255,255,.26);
+      --glass-border:  rgba(255,255,255,.60);
+      --glass-blur:    26px;
     }
 
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: var(--surface);
       color: var(--text);
       min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(124,108,246,.14), transparent 42%),
+        linear-gradient(180deg, rgba(253,246,236,.62) 0%, rgba(244,239,253,.68) 45%, rgba(236,233,252,.74) 100%),
+        url("{% static 'img/hero-bg.jpg' %}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      text-shadow: 0 1px 2px rgba(255,255,255,.35);
     }
 
     /* Header */
     .zs-header {
       padding: 14px 20px;
       display: flex; align-items: center; gap: 8px;
-      border-bottom: 1px solid var(--border);
+      background: var(--glass-strong);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     .zs-logo-icon {
       width: 30px; height: 30px; border-radius: 8px;
@@ -65,7 +87,7 @@
     .sbar-step.done::after, .sbar-step.active::after { background: var(--violet-lt); }
     .sbar-dot {
       width: 28px; height: 28px; border-radius: 50%;
-      background: var(--surface); border: 1.5px solid var(--border);
+      background: var(--glass-surface); border: 1.5px solid var(--glass-border);
       display: grid; place-items: center;
       font-size: .75rem; font-weight: 700; color: var(--subtle);
       position: relative; z-index: 1; transition: all .3s;
@@ -81,9 +103,12 @@
 
     /* Consent panel */
     .consent-panel {
-      background: var(--bg);
-      border: 1px solid var(--border);
+      background: var(--glass-surface);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
       border-radius: 16px;
+      box-shadow: 0 12px 36px rgba(23,32,51,.1), 0 2px 8px rgba(23,32,51,.05);
       padding: 28px 24px;
       margin-bottom: 20px;
     }
@@ -100,12 +125,12 @@
     .consent-text { font-size: .85rem; color: var(--muted); text-align: center; line-height: 1.6; margin-bottom: 20px; }
     .consent-check {
       display: flex; align-items: flex-start; gap: 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,.55);
+      border: 1px solid var(--glass-border);
       border-radius: 10px;
       padding: 14px;
       cursor: pointer;
-      transition: border-color .15s;
+      transition: border-color .15s, background .15s;
     }
     .consent-check:hover { border-color: var(--violet); }
     .consent-check input[type=checkbox] { display: none; }
@@ -126,7 +151,10 @@
     .selfie-section.visible { display: block; }
 
     .upload-zone {
-      border: 1.5px dashed var(--border);
+      background: var(--glass-surface);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1.5px dashed rgba(99,91,235,.35);
       border-radius: 16px;
       padding: 2rem 1rem;
       text-align: center;
@@ -154,8 +182,8 @@
     .opt-label { font-size: .72rem; font-weight: 700; color: var(--subtle); letter-spacing: .06em; text-transform: uppercase; margin-bottom: .6rem; }
     .zs-input {
       width: 100%;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
+      background: rgba(255,255,255,.55);
+      border: 1.5px solid var(--glass-border);
       border-radius: 10px;
       color: var(--text);
       padding: .65rem .9rem;
@@ -166,7 +194,7 @@
       margin-bottom: .6rem;
     }
     .zs-input::placeholder { color: var(--subtle); }
-    .zs-input:focus { border-color: var(--violet); background: var(--surface); }
+    .zs-input:focus { border-color: var(--violet); background: rgba(255,255,255,.85); }
 
     /* Submit button */
     .btn-snap {
