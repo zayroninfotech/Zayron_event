@@ -79,7 +79,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ── MongoDB connection (used directly via pymongo through mongo_store.py) ──
 MONGO_HOST = env('MONGO_HOST', default='localhost')
 MONGO_PORT = env.int('MONGO_PORT', default=27017)
-MONGO_DB = env('MONGO_DB', default='event_photo_hub')
+MONGO_DB = env('MONGO_DB', default='zayrosnap')
 MONGO_USER = env('MONGO_USER', default='')
 MONGO_PASSWORD = env('MONGO_PASSWORD', default='')
 MONGO_AUTH_SOURCE = env('MONGO_AUTH_SOURCE', default='admin')

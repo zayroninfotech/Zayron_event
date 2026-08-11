@@ -1,4 +1,4 @@
-# Event Photo Hub
+# ZayroSnap
 
 A Django application that lets event organizers upload bulk photos, auto-detect faces via Celery workers, and let guests find their own photos by scanning a QR code and uploading a selfie.
 
@@ -126,7 +126,7 @@ Django admin is at `/admin/`. Key actions:
 ## Project Structure
 
 ```
-event_photo_hub/
+zayrosnap/
 ├── config/          # Django settings, Celery app, URLs
 ├── accounts/        # Organizer auth (login / register)
 ├── events/          # Event CRUD, QR generation, organizer dashboard
