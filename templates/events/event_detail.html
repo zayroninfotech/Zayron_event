@@ -1,14 +1,17 @@
 {% extends 'base.html' %}
 {% block title %}{{ event.name }} — ZayroSnap{% endblock %}
 {% block content %}
+
 <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
   <div>
-    <h3 class="mb-0">{{ event.name }}</h3>
-    <p class="text-muted small mb-0"><i class="bi bi-calendar-event"></i> {{ event.event_date }}</p>
-    {% if event.description %}<p class="text-muted small">{{ event.description }}</p>{% endif %}
+    <h3 class="fw-bold mb-0">{{ event.name }}</h3>
+    <span class="badge px-3 py-1 rounded-pill" style="background:var(--zs-blue-lt); color:var(--zs-blue);">
+      <i class="bi bi-calendar-event"></i> {{ event.event_date }}
+    </span>
+    {% if event.description %}<p class="text-muted small mt-1 mb-0">{{ event.description }}</p>{% endif %}
   </div>
   <div class="d-flex gap-2 flex-wrap">
-    <a href="{% url 'event_edit' event.slug %}" class="btn btn-sm btn-outline-secondary">
+    <a href="{% url 'event_edit' event.slug %}" class="btn btn-sm btn-outline-dark">
       <i class="bi bi-pencil"></i> Edit
     </a>
     <a href="{% url 'event_delete' event.slug %}" class="btn btn-sm btn-outline-danger">
@@ -18,55 +21,56 @@
 </div>
 
 <div class="row g-4 mb-4">
-  <!-- QR Code card -->
+  <!-- QR Code -->
   <div class="col-md-4">
-    <div class="card p-3 text-center">
-      <h6 class="mb-3">Guest QR Code</h6>
+    <div class="card p-3 text-center h-100">
+      <h6 class="fw-bold mb-3" style="color:var(--zs-navy);">
+        <i class="bi bi-qr-code"></i> Guest QR Code
+      </h6>
       {% if event.qr_code %}
-        <img src="{{ event.qr_code.url }}" alt="QR code" class="img-fluid mb-2" style="max-width:200px;margin:0 auto">
-        <a href="{{ event.qr_code.url }}" download class="btn btn-sm btn-outline-dark">
+        <img src="{{ event.qr_code.url }}" alt="QR code" class="img-fluid mb-2 mx-auto"
+             style="max-width:180px; border:3px solid var(--zs-gold); border-radius:8px; padding:6px; background:#fff;">
+        <a href="{{ event.qr_code.url }}" download class="btn btn-gold btn-sm mb-2">
           <i class="bi bi-download"></i> Download QR
         </a>
-        <p class="text-muted small mt-2">Share with guests to upload their selfie</p>
-        <div class="input-group input-group-sm mt-1">
+        <p class="text-muted small mb-2">Share with guests to find their photos</p>
+        <div class="input-group input-group-sm">
           <input type="text" class="form-control" id="guestUrl"
-                 value="{{ request.scheme }}://{{ request.get_host }}{% url 'guest_upload' event.slug %}"
-                 readonly>
-          <button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('guestUrl').value)">
+                 value="{{ request.scheme }}://{{ request.get_host }}{% url 'guest_upload' event.slug %}" readonly>
+          <button class="btn btn-outline-dark" onclick="navigator.clipboard.writeText(document.getElementById('guestUrl').value)" title="Copy">
             <i class="bi bi-clipboard"></i>
           </button>
         </div>
       {% else %}
-        <span class="text-muted">Generating…</span>
+        <p class="text-muted">Generating QR…</p>
       {% endif %}
     </div>
   </div>
 
-  <!-- Upload card -->
+  <!-- Upload -->
   <div class="col-md-8">
-    <div class="card p-3">
+    <div class="card p-3 h-100">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="mb-0">Photos
-          <span class="badge bg-secondary" id="processedBadge">
+        <h6 class="fw-bold mb-0" style="color:var(--zs-navy);">
+          <i class="bi bi-images"></i> Photos
+          <span class="badge ms-1 px-2" style="background:var(--zs-blue); font-size:.75rem;" id="processedBadge">
             {{ event.processed_photos }}/{{ event.total_photos }}
           </span>
         </h6>
       </div>
       {% if event.total_photos %}
-      <div class="progress mb-3 status-bar" id="progressBar">
-        <div class="progress-bar bg-success"
-             id="progressFill"
-             style="width: {% widthratio event.processed_photos event.total_photos 100 %}%">
-        </div>
+      <div class="progress mb-3">
+        <div class="progress-bar" id="progressFill"
+             style="width: {% widthratio event.processed_photos event.total_photos 100 %}%"></div>
       </div>
       {% endif %}
       <div id="uploadArea">
         <div class="mb-3">
-          <label class="form-label fw-semibold">Upload photos (unlimited)</label>
-          <input type="file" id="photoInput" class="form-control" multiple accept="image/*">
-          <div class="form-text">JPG, PNG, WEBP. Sent in chunks of 50. Face detection runs in the background.</div>
+          <label class="form-label fw-semibold" style="color:var(--zs-navy);">Upload Photos</label>
+          <input type="file" name="photos" class="form-control" multiple accept="image/*" required>
+          <div class="form-text">Multiple files allowed. Face detection runs in the background.</div>
         </div>
-        <button class="btn btn-dark" id="uploadBtn" onclick="startChunkedUpload()" disabled>
+        <button class="btn btn-primary fw-semibold px-4" type="submit">
           <i class="bi bi-cloud-upload"></i> Upload
         </button>
         <span id="uploadStatus" class="ms-3 small text-muted"></span>
@@ -81,7 +85,9 @@
 
 <!-- Photo grid -->
 {% if photos %}
-<h5 class="mb-3">Uploaded Photos</h5>
+<h5 class="fw-bold mb-3" style="color:var(--zs-navy);">
+  <i class="bi bi-grid-3x3-gap"></i> Uploaded Photos
+</h5>
 <div class="row g-2 photo-grid">
   {% for photo in photos %}
   <div class="col-6 col-sm-4 col-md-3 col-lg-2">
@@ -91,24 +97,22 @@
       {% else %}
         <img src="{{ photo.image.url }}" alt="{{ photo.filename }}" loading="lazy">
       {% endif %}
-      <span class="badge position-absolute top-0 end-0 m-1
-            {% if photo.processed %}bg-success{% else %}badge-pending{% endif %}">
+      <span class="badge position-absolute top-0 end-0 m-1"
+            style="background:{% if photo.processed %}var(--zs-blue){% else %}var(--zs-gold){% endif %}; font-size:.7rem;">
         {% if photo.processed %}{{ photo.face_count }}f{% else %}…{% endif %}
       </span>
     </div>
     <form method="post" action="{% url 'delete_photo' photo.pk %}" class="mt-1"
           onsubmit="return confirm('Delete this photo?')">
       {% csrf_token %}
-      <button class="btn btn-sm btn-outline-danger w-100">
-        <i class="bi bi-trash"></i>
-      </button>
+      <button class="btn btn-sm btn-outline-danger w-100"><i class="bi bi-trash"></i></button>
     </form>
   </div>
   {% endfor %}
 </div>
 {% else %}
-<div class="text-center py-4 text-muted">
-  <i class="bi bi-images display-5"></i>
+<div class="text-center py-5" style="color:var(--zs-muted);">
+  <div style="font-size:3.5rem; opacity:.25;">🖼️</div>
   <p class="mt-2">No photos yet — upload some above.</p>
 </div>
 {% endif %}
@@ -116,63 +120,6 @@
 
 {% block extra_js %}
 <script>
-// Enable upload button only when files are selected
-document.getElementById('photoInput').addEventListener('change', function(){
-  document.getElementById('uploadBtn').disabled = this.files.length === 0;
-  document.getElementById('uploadStatus').textContent =
-    this.files.length ? `${this.files.length} file(s) selected` : '';
-});
-
-const CHUNK_SIZE = 50;
-const UPLOAD_URL = "{% url 'bulk_upload' event.slug %}";
-const CSRF = "{{ csrf_token }}";
-
-async function startChunkedUpload() {
-  const input = document.getElementById('photoInput');
-  const files = Array.from(input.files);
-  if (!files.length) return;
-
-  const btn = document.getElementById('uploadBtn');
-  const status = document.getElementById('uploadStatus');
-  const progressWrap = document.getElementById('chunkProgress');
-  const fill = document.getElementById('chunkFill');
-
-  btn.disabled = true;
-  progressWrap.classList.remove('d-none');
-
-  let uploaded = 0;
-  const total = files.length;
-  const chunks = [];
-  for (let i = 0; i < total; i += CHUNK_SIZE) chunks.push(files.slice(i, i + CHUNK_SIZE));
-
-  for (let i = 0; i < chunks.length; i++) {
-    const fd = new FormData();
-    chunks[i].forEach(f => fd.append('photos', f));
-
-    status.textContent = `Uploading batch ${i + 1}/${chunks.length}…`;
-    try {
-      const res = await fetch(UPLOAD_URL, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-        body: fd,
-      });
-      if (!res.ok) throw new Error(`Server error on batch ${i + 1}`);
-      const data = await res.json();
-      uploaded += data.uploaded;
-    } catch (err) {
-      status.textContent = `Error on batch ${i + 1}: ${err.message}`;
-      btn.disabled = false;
-      return;
-    }
-
-    fill.style.width = Math.round((i + 1) / chunks.length * 100) + '%';
-  }
-
-  status.textContent = `✓ ${uploaded} photo(s) uploaded! Reloading…`;
-  setTimeout(() => location.reload(), 1200);
-}
-
-// Poll processing status every 5s while there are unprocessed photos
 (function(){
   const slug = '{{ event.slug }}';
   function poll(){
@@ -182,9 +129,7 @@ async function startChunkedUpload() {
         const badge = document.getElementById('processedBadge');
         if(badge) badge.textContent = `${data.processed}/${data.total}`;
         const fill = document.getElementById('progressFill');
-        if(fill && data.total > 0){
-          fill.style.width = Math.round(data.processed/data.total*100) + '%';
-        }
+        if(fill && data.total > 0) fill.style.width = Math.round(data.processed/data.total*100) + '%';
         if(data.processed < data.total) setTimeout(poll, 5000);
       });
   }

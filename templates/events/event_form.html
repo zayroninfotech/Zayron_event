@@ -4,20 +4,21 @@
 <div class="row justify-content-center">
   <div class="col-md-8 col-lg-6">
     <div class="card p-4">
-      <h4 class="mb-3">{{ action }} Event</h4>
+      <h4 class="fw-bold mb-1" style="color:var(--zs-navy);">{{ action }} Event</h4>
+      <p class="text-muted small mb-4">Fill in the event details below.</p>
       <form method="post">
         {% csrf_token %}
         {% for field in form %}
           <div class="mb-3">
-            <label class="form-label fw-semibold">{{ field.label }}</label>
+            <label class="form-label fw-semibold" style="color:var(--zs-navy);">{{ field.label }}</label>
             {{ field }}
             {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
-            {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+            {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors }}</div>{% endif %}
           </div>
         {% endfor %}
-        <div class="d-flex gap-2">
-          <button class="btn btn-dark" type="submit">{{ action }}</button>
-          <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+        <div class="d-flex gap-2 mt-4">
+          <button class="btn btn-gold px-4 fw-semibold" type="submit">{{ action }}</button>
+          <a href="{% url 'dashboard' %}" class="btn btn-outline-dark">Cancel</a>
         </div>
       </form>
     </div>

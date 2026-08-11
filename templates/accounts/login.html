@@ -1,23 +1,169 @@
-{% extends 'base.html' %}
-{% block title %}Login — ZayroSnap{% endblock %}
-{% block content %}
-<div class="row justify-content-center">
-  <div class="col-sm-10 col-md-6 col-lg-4">
-    <div class="card p-4">
-      <h4 class="mb-3 text-center">Organizer Login</h4>
-      <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-          <div class="mb-3">
-            <label class="form-label">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
-          </div>
-        {% endfor %}
-        <button class="btn btn-dark w-100" type="submit">Login</button>
-      </form>
-      <p class="text-center mt-3 small">No account? <a href="{% url 'register' %}">Register</a></p>
-    </div>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — ZayroSnap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar">
+  <div class="brand">
+    <div class="brand-camera"><i class="fa-solid fa-camera"></i></div>
+    <div class="brand-name">Zayro<strong>Snap</strong></div>
   </div>
-</div>
-{% endblock %}
+  <div class="nav-links">
+    <a href="{% url 'login' %}" class="login-link">
+      <i class="fa-solid fa-right-to-bracket"></i> Login
+    </a>
+    <a href="{% url 'register' %}" class="register-btn">
+      <i class="fa-solid fa-user-plus"></i> Register
+    </a>
+  </div>
+</nav>
+
+<!-- ── PAGE ── -->
+<div class="page">
+  <!-- Background waves -->
+  <div class="background-wave wave-one"></div>
+  <div class="background-wave wave-two"></div>
+  <!-- Gold dot grids -->
+  <div class="gold-dots dots-left"></div>
+  <div class="gold-dots dots-right"></div>
+
+  <!-- ── LOGIN CARD ── -->
+  <div class="login-card">
+
+    <!-- LEFT BRAND PANEL -->
+    <div class="brand-panel">
+      <div class="camera-circle">
+        <span class="sparkle sparkle-one">✦</span>
+        <span class="sparkle sparkle-two">✦</span>
+        <i class="fa-solid fa-camera"></i>
+      </div>
+      <h1>Zayro<strong>Snap</strong></h1>
+      <div class="gold-divider">
+        <span></span><b>◆ ORGANIZER ◆</b><span></span>
+      </div>
+      <p>Welcome back</p>
+      <div class="panel-lines">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- RIGHT FORM PANEL -->
+    <div class="form-panel">
+      <div class="form-content">
+
+        <!-- Mobile-only header (hidden on desktop) -->
+        <h2 class="mobile-title">Zayro<strong style="color:#a86f05;">Snap</strong></h2>
+        <p class="mobile-subtitle">Sign in to your organizer account</p>
+
+        <form method="post" id="loginForm">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+          <div style="background:#fff3cd;border:1px solid #e8c979;border-radius:9px;padding:10px 14px;margin-bottom:18px;color:#7a5800;font-size:14px;">
+            <i class="fa-solid fa-triangle-exclamation" style="color:#d69a16;"></i>
+            {{ form.non_field_errors }}
+          </div>
+          {% endif %}
+
+          <!-- Username -->
+          <div class="input-group">
+            <label for="id_username">Username</label>
+            <div class="input-box">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="id_username" name="username"
+                     placeholder="Enter your username"
+                     value="{{ form.username.value|default:'' }}"
+                     autocomplete="username" autofocus>
+            </div>
+            {% if form.username.errors %}
+            <p style="color:#c0392b;font-size:13px;margin-top:5px;">{{ form.username.errors }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Password -->
+          <div class="input-group">
+            <label for="id_password">Password</label>
+            <div class="input-box">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="id_password" name="password"
+                     placeholder="••••••••••"
+                     autocomplete="current-password">
+              <button type="button" class="password-toggle" onclick="togglePassword()" title="Show/hide password">
+                <i class="fa-regular fa-eye-slash" id="eyeIcon"></i>
+              </button>
+            </div>
+            {% if form.password.errors %}
+            <p style="color:#c0392b;font-size:13px;margin-top:5px;">{{ form.password.errors }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Options row -->
+          <div class="form-options">
+            <label class="remember">
+              <input type="checkbox" name="remember">
+              <span class="custom-checkbox"><i class="fa-solid fa-check" style="font-size:10px;"></i></span>
+              Remember me
+            </label>
+            <a href="#" class="forgot">Forgot password?</a>
+          </div>
+
+          <!-- Login button -->
+          <button type="submit" class="login-button" id="loginBtn">
+            Sign In <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <!-- OR divider -->
+        <div class="or-divider">
+          <span></span><p>OR</p><span></span>
+        </div>
+
+        <!-- Google button (UI only) -->
+        <button class="google-button" type="button">
+          <span class="google-icon">G</span>
+          Continue with Google
+        </button>
+
+        <!-- Register link -->
+        <p class="register-text">
+          No account? <a href="{% url 'register' %}">Create one</a>
+        </p>
+
+      </div>
+    </div>
+
+  </div><!-- /login-card -->
+</div><!-- /page -->
+
+<script>
+function togglePassword() {
+  const inp = document.getElementById('id_password');
+  const ico = document.getElementById('eyeIcon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    ico.className = 'fa-regular fa-eye';
+  } else {
+    inp.type = 'password';
+    ico.className = 'fa-regular fa-eye-slash';
+  }
+}
+
+document.getElementById('loginForm').addEventListener('submit', function () {
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing in…';
+});
+</script>
+</body>
+</html>

@@ -7,44 +7,107 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    body { background: #f8f9fa; }
-    .navbar-brand { font-weight: 700; letter-spacing: -0.5px; }
-    .card { border: none; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-    .photo-grid img { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; }
-    .badge-pending { background: #ffc107; color: #000; }
-    .badge-done { background: #198754; }
-    .status-bar { height: 6px; border-radius: 3px; }
+    :root {
+      --zs-navy:   #0b1f4f;
+      --zs-blue:   #1a4db5;
+      --zs-blue-lt:#e8efff;
+      --zs-gold:   #c9a227;
+      --zs-gold-lt:#fff8e1;
+      --zs-white:  #ffffff;
+      --zs-body:   #f0f4ff;
+      --zs-text:   #1a1f36;
+      --zs-muted:  #5a6585;
+    }
+
+    body { background: var(--zs-body); color: var(--zs-text); }
+
+    /* ── Navbar ── */
+    .navbar { background: var(--zs-navy) !important; border-bottom: 3px solid var(--zs-gold); }
+    .navbar-brand {
+      font-weight: 800;
+      letter-spacing: -.5px;
+      color: var(--zs-white) !important;
+    }
+    .navbar-brand span { color: var(--zs-gold); }
+    .nav-link { color: rgba(255,255,255,.85) !important; font-weight: 500; }
+    .nav-link:hover { color: var(--zs-gold) !important; }
+    .navbar .btn-link {
+      color: rgba(255,255,255,.85) !important;
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .navbar .btn-link:hover { color: var(--zs-gold) !important; }
+
+    /* ── Cards ── */
+    .card {
+      border: none;
+      border-top: 3px solid var(--zs-blue);
+      box-shadow: 0 2px 10px rgba(26,77,181,.1);
+      border-radius: 10px;
+    }
+    .card-footer { border-top: 1px solid var(--zs-blue-lt); }
+
+    /* ── Buttons ── */
+    .btn-primary  { background: var(--zs-blue);  border-color: var(--zs-blue); color: #fff; }
+    .btn-primary:hover { background: #153d96; border-color: #153d96; }
+    .btn-gold     { background: var(--zs-gold);  border-color: var(--zs-gold); color: #fff; font-weight: 600; }
+    .btn-gold:hover { background: #b08a1e; border-color: #b08a1e; color: #fff; }
+    .btn-dark     { background: var(--zs-navy);  border-color: var(--zs-navy); }
+    .btn-dark:hover { background: #0d2a69; }
+    .btn-outline-dark { color: var(--zs-navy); border-color: var(--zs-navy); }
+    .btn-outline-dark:hover { background: var(--zs-navy); color: #fff; }
+
+    /* ── Photo grid ── */
+    .photo-grid img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; border: 2px solid var(--zs-blue-lt); }
+    .photo-grid img:hover { border-color: var(--zs-gold); }
+
+    /* ── Progress / badges ── */
+    .progress { background: var(--zs-blue-lt); height: 6px; border-radius: 3px; }
+    .progress-bar { background: var(--zs-gold) !important; }
+    .badge-pending { background: var(--zs-gold); color: #fff; }
+    .badge-done    { background: var(--zs-blue); color: #fff; }
+
+    /* ── Section titles ── */
+    h3, h4, h5 { color: var(--zs-navy); }
+    .text-muted { color: var(--zs-muted) !important; }
+
+    /* ── Alert overrides ── */
+    .alert-success { background: #e6f4ea; border-color: #27ae60; color: #145a32; }
+    .alert-warning { background: var(--zs-gold-lt); border-color: var(--zs-gold); color: #7d5900; }
+    .alert-danger  { background: #fdecea; border-color: #c0392b; color: #6b1a14; }
+    .alert-info    { background: var(--zs-blue-lt); border-color: var(--zs-blue); color: #0b2a6e; }
   </style>
   {% block extra_css %}{% endblock %}
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg mb-4">
   <div class="container">
-    <a class="navbar-brand" href="{% url 'dashboard' %}">📷 ZayroSnap</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+    <a class="navbar-brand" href="{% url 'dashboard' %}">📸 Zayro<span>Snap</span></a>
+    <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="nav">
-      <ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
         {% if user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'event_create' %}">New Event</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'event_create' %}"><i class="bi bi-plus-circle"></i> New Event</a></li>
           <li class="nav-item">
             <form method="post" action="{% url 'logout' %}" class="d-inline">
               {% csrf_token %}
               <button type="submit" class="nav-link btn btn-link p-0 border-0">
-                Logout ({{ user.username }})
+                <i class="bi bi-box-arrow-right"></i> Logout ({{ user.username }})
               </button>
             </form>
           </li>
         {% else %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="bi bi-person"></i> Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'register' %}"><i class="bi bi-person-plus"></i> Register</a></li>
         {% endif %}
       </ul>
     </div>
   </div>
 </nav>
+
 <div class="container pb-5">
   {% for msg in messages %}
     <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
@@ -54,6 +117,13 @@
   {% endfor %}
   {% block content %}{% endblock %}
 </div>
+
+<footer class="py-3 mt-4" style="background:var(--zs-navy); border-top:3px solid var(--zs-gold);">
+  <div class="container text-center" style="color:rgba(255,255,255,.6); font-size:.85rem;">
+    © 2026 <span style="color:var(--zs-gold); font-weight:600;">ZayroSnap</span> — Powered by Zayron Infotech
+  </div>
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 {% block extra_js %}{% endblock %}
 </body>

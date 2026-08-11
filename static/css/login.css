@@ -1,0 +1,301 @@
+/* =====================================================
+   ZAYROSNAP LOGIN
+   Premium Black + Gold + Cream Theme
+===================================================== */
+
+:root {
+    --black: #0b1f4f;
+    --black-soft: #122569;
+    --gold: #d69a16;
+    --gold-light: #f3c65b;
+    --gold-dark: #a86f05;
+    --cream: #fffaf0;
+    --cream-dark: #f4ead6;
+    --white: #ffffff;
+    --text: #10151b;
+    --muted: #77736b;
+    --border: #e8c979;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+body {
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 10% 20%, rgba(214,154,22,0.08), transparent 30%),
+        linear-gradient(135deg, #fffdf8 0%, #f7edd9 50%, #fffaf0 100%);
+}
+
+/* ── NAVBAR ── */
+.navbar {
+    height: 78px;
+    width: 100%;
+    padding: 0 55px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(100deg, #071238, #0d1f55, #0b1a47);
+    border-bottom: 3px solid var(--gold);
+    position: relative;
+    z-index: 20;
+}
+
+.brand { display: flex; align-items: center; gap: 13px; }
+.brand-camera {
+    width: 48px; height: 40px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    color: #111; font-size: 23px;
+    background: linear-gradient(145deg, #f7ca55, #c8890c);
+
+    box-shadow: 0 5px 15px rgba(214,154,22,0.25);
+}
+.brand-name { font-size: 29px; font-weight: 700; letter-spacing: -1px; color: white; }
+.brand-name strong { color: var(--gold-light); }
+
+.nav-links { display: flex; align-items: center; gap: 35px; }
+.nav-links a {
+    text-decoration: none; color: white;
+    font-size: 17px; font-weight: 500;
+    display: flex; align-items: center; gap: 9px;
+}
+.login-link { transition: 0.3s; }
+.login-link:hover { color: var(--gold-light); }
+.register-btn {
+    padding: 12px 22px;
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    color: var(--gold-light) !important;
+    transition: 0.3s ease;
+}
+.register-btn:hover { background: var(--gold); color: #111 !important; }
+
+/* ── PAGE ── */
+.page {
+    height: calc(100vh - 78px);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px 30px;
+    overflow: hidden;
+}
+
+/* ── BACKGROUND WAVES ── */
+.background-wave { position: absolute; pointer-events: none; }
+.wave-one {
+    width: 900px; height: 900px;
+    left: -450px; bottom: -550px;
+    border-radius: 50%;
+    border: 80px solid rgba(11,31,79,0.96);
+    box-shadow: 0 0 0 10px rgba(214,154,22,0.8);
+}
+.wave-two {
+    width: 850px; height: 850px;
+    right: -500px; top: -500px;
+    border-radius: 50%;
+    border: 65px solid rgba(11,31,79,0.95);
+    box-shadow: 0 0 0 8px rgba(214,154,22,0.85);
+}
+
+/* ── DOTS ── */
+.gold-dots {
+    position: absolute; width: 100px; height: 80px; opacity: 0.75;
+    background-image: radial-gradient(var(--gold) 2px, transparent 2px);
+    background-size: 20px 20px;
+}
+.dots-left  { left: 55px;  top: 125px; }
+.dots-right { right: 70px; bottom: 120px; }
+
+/* ── LOGIN CARD ── */
+.login-card {
+    width: min(820px, 95vw);
+    height: min(580px, calc(100vh - 118px));
+    display: grid;
+    grid-template-columns: 42% 58%;
+    position: relative; z-index: 5;
+    background: white;
+    border-radius: 24px; overflow: hidden;
+    border: 1px solid rgba(214,154,22,0.75);
+    box-shadow: 0 30px 70px rgba(30,24,10,0.20);
+}
+
+/* ── LEFT PANEL ── */
+.brand-panel {
+    position: relative;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 30px 30px;
+    color: white;
+    background: linear-gradient(145deg, #0b1f4f, #1a3a80);
+    overflow: hidden;
+}
+.brand-panel::after {
+    content: "";
+    position: absolute;
+    right: -85px; top: -40px;
+    width: 150px; height: 700px;
+    background: white;
+    border-radius: 50%;
+    transform: rotate(5deg);
+    box-shadow: -10px 0 0 var(--gold);
+}
+
+.camera-circle {
+    width: 145px; height: 145px;
+    border: 2px solid var(--gold-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 2;
+    margin-bottom: 28px;
+    background: radial-gradient(circle, #1a3a80, #071238 70%);
+}
+.camera-circle i {
+    font-size: 66px; color: var(--gold-light);
+    filter: drop-shadow(0 5px 10px rgba(214,154,22,0.3));
+}
+.sparkle { position: absolute; color: var(--gold-light); font-size: 23px; }
+.sparkle-one { top: 24px; left: 32px; }
+.sparkle-two { top: 15px; right: 27px; }
+
+.brand-panel h1 {
+    font-size: 39px; font-weight: 700;
+    position: relative; z-index: 3; letter-spacing: -1.5px;
+}
+.brand-panel h1 strong { color: var(--gold-light); }
+
+.gold-divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 13px 0; position: relative; z-index: 3;
+}
+.gold-divider span { width: 65px; height: 1px; background: var(--gold); }
+.gold-divider b { color: var(--gold-light); font-size: 12px; }
+
+.brand-panel p { position: relative; z-index: 3; font-size: 17px; color: #e7e2d7; }
+
+.panel-lines {
+    position: absolute; bottom: 30px; left: 35px;
+    display: flex; flex-direction: column; gap: 7px;
+}
+.panel-lines span { width: 100px; height: 1px; background: rgba(214,154,22,0.4); }
+
+/* ── FORM PANEL ── */
+.form-panel {
+    background: linear-gradient(135deg, #ffffff, #fffdf9);
+    display: flex; align-items: center; justify-content: center;
+    padding: 28px 48px;
+}
+.form-content { width: 100%; max-width: 430px; }
+.mobile-title, .mobile-subtitle { display: none; }
+
+/* ── INPUTS ── */
+.input-group { margin-bottom: 16px; }
+.input-group label {
+    display: block; font-size: 14px; font-weight: 700; margin-bottom: 7px;
+}
+.input-box {
+    height: 48px;
+    border: 1px solid #e7d6a7; border-radius: 11px;
+    display: flex; align-items: center;
+    padding: 0 16px; transition: 0.25s;
+    background: #fffdfa;
+}
+.input-box:focus-within {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(214,154,22,0.12);
+}
+.input-box > i { color: #25292d; margin-right: 14px; font-size: 18px; }
+.input-box input {
+    width: 100%; height: 100%;
+    border: none; outline: none;
+    background: transparent; font-size: 16px; color: #171b1e;
+}
+.input-box input::placeholder { color: #aaa59b; }
+
+.password-toggle {
+    border: none; background: transparent;
+    cursor: pointer; font-size: 17px; color: #68645d;
+}
+.password-toggle:hover { color: var(--gold); }
+
+/* ── OPTIONS ── */
+.form-options {
+    display: flex; justify-content: space-between; align-items: center;
+    margin: -2px 0 16px; font-size: 14px;
+}
+.remember { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.remember input { display: none; }
+.custom-checkbox {
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--gold); border-radius: 5px;
+    background: var(--gold); color: white; font-size: 11px;
+}
+.forgot { text-decoration: none; color: var(--gold-dark); font-weight: 600; }
+.forgot:hover { text-decoration: underline; }
+
+/* ── LOGIN BUTTON ── */
+.login-button {
+    width: 100%; height: 50px;
+    border: none; border-radius: 11px; cursor: pointer;
+    color: white; font-size: 18px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 20px;
+    background: linear-gradient(135deg, #b97804, #e3a91d);
+    box-shadow: 0 9px 20px rgba(168,111,5,0.22);
+    transition: 0.3s ease;
+}
+.login-button:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(168,111,5,0.30); }
+.login-button:disabled { opacity: .65; transform: none; cursor: default; }
+
+/* ── OR ── */
+.or-divider { display: flex; align-items: center; gap: 14px; margin: 16px 0; }
+.or-divider span { height: 1px; flex: 1; background: #e1d4b7; }
+.or-divider p { font-size: 13px; color: #777269; }
+
+/* ── GOOGLE ── */
+.google-button {
+    width: 100%; height: 48px;
+    border: 1px solid #dfcfaa; border-radius: 11px;
+    background: white; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    font-size: 16px; font-weight: 600; transition: 0.25s;
+}
+.google-button:hover { border-color: var(--gold); background: #fffaf0; }
+.google-icon { font-size: 20px; font-weight: 800; color: #4285f4; }
+
+/* ── REGISTER ── */
+.register-text { text-align: center; margin-top: 14px; font-size: 15px; color: #66635c; }
+.register-text a { color: var(--gold-dark); text-decoration: none; font-weight: 700; }
+.register-text a:hover { text-decoration: underline; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 850px) {
+    .navbar { padding: 0 25px; }
+    .brand-name { font-size: 23px; }
+    .brand-camera { width: 40px; height: 35px; font-size: 18px; }
+    .login-card { grid-template-columns: 1fr; max-width: 500px; }
+    .brand-panel { min-height: 250px; }
+    .brand-panel::after { display: none; }
+    .form-panel { padding: 40px 35px; }
+}
+
+@media (max-width: 600px) {
+    .navbar { height: 70px; padding: 0 18px; }
+    .nav-links { gap: 10px; }
+    .login-link { display: none !important; }
+    .register-btn { padding: 9px 13px; font-size: 14px !important; }
+    .page { padding: 35px 15px; min-height: calc(100vh - 70px); }
+    .login-card { border-radius: 18px; }
+    .brand-panel { min-height: 210px; padding: 30px; }
+    .camera-circle { width: 85px; height: 85px; margin-bottom: 15px; }
+    .camera-circle i { font-size: 40px; }
+    .brand-panel h1 { font-size: 28px; }
+    .brand-panel p { font-size: 14px; }
+    .gold-divider span { width: 35px; }
+    .form-panel { padding: 35px 22px; }
+    .mobile-title { display: block; text-align: center; font-size: 25px; margin-bottom: 6px; }
+    .mobile-subtitle { display: block; text-align: center; color: #888; font-size: 13px; margin-bottom: 28px; }
+    .form-options { font-size: 12px; }
+    .login-button { height: 52px; }
+    .dots-left, .dots-right { display: none; }
+}
