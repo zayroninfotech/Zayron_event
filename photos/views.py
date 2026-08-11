@@ -1,14 +1,32 @@
 import io
 import os
 import zipfile
+from PIL import Image
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, FileResponse, Http404
 from django.contrib import messages
 from django.views.decorators.http import require_POST
+from django.core.files.base import ContentFile
 from events.models import Event
 from .models import EventPhoto
 from .tasks import process_event_photo
+
+
+def _make_thumbnail_safe(photo):
+    """Fast thumbnail — uses Image.thumbnail so only needed pixels are decoded."""
+    try:
+        with Image.open(photo.image.path) as img:
+            img.thumbnail((400, 400), Image.LANCZOS)
+            buf = io.BytesIO()
+            img.save(buf, format='JPEG', quality=80)
+            photo.thumbnail.save(
+                f'thumb_{photo.pk}.jpg',
+                ContentFile(buf.getvalue()),
+                save=True,
+            )
+    except Exception:
+        pass
 
 
 @login_required
@@ -27,8 +45,11 @@ def bulk_upload(request, slug):
     created = []
     for f in files:
         photo = EventPhoto.objects.create(event=event, image=f)
-        process_event_photo.delay(photo.pk)
+        # Generate thumbnail immediately but lightweight — skip face recognition on upload
+        _make_thumbnail_safe(photo)
         created.append(photo.pk)
+        # Queue face recognition separately (runs after response is sent)
+        process_event_photo.apply_async((photo.pk,), countdown=2)
 
     if is_ajax:
         return JsonResponse({'uploaded': len(created)})

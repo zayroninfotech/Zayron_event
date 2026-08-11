@@ -118,7 +118,8 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_IGNORE_RESULT = True
-CELERY_TASK_ALWAYS_EAGER = False
+CELERY_TASK_ALWAYS_EAGER = True   # runs inline since no worker process on VPS
+CELERY_TASK_EAGER_PROPAGATES = False
 
 # Auth redirects
 LOGIN_URL = '/accounts/login/'
