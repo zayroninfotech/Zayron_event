@@ -104,13 +104,17 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Celery
-CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://localhost:6379/1')
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='memory://')
+CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
-CELERY_RESULT_EXTENDED = True
+CELERY_TASK_IGNORE_RESULT = True
+# Run tasks synchronously in the web process — no Redis or worker needed for local dev.
+# Remove this (or set to False) in production and run: celery -A config worker
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = False  # don't let task errors crash the request
 
 # Auth redirects
 LOGIN_URL = '/accounts/login/'
