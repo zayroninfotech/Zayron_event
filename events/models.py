@@ -43,10 +43,10 @@ class Event(models.Model):
             self._generate_qr_code()
 
     def _generate_qr_code(self):
+        from django.conf import settings as _s
         guest_url = reverse('guest_landing', kwargs={'slug': self.slug})
-        # Build absolute URL with a placeholder host — organizer can share the QR
-        # The QR stores just the path; organizer updates host in production
-        full_url = f'http://localhost:8000{guest_url}'
+        site_url = getattr(_s, 'SITE_URL', 'http://localhost:8000').rstrip('/')
+        full_url = f'{site_url}{guest_url}'
         qr = qrcode.QRCode(version=1, box_size=10, border=4)
         qr.add_data(full_url)
         qr.make(fit=True)

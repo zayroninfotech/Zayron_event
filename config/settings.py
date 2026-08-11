@@ -77,6 +77,8 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ── MongoDB connection (used directly via pymongo through mongo_store.py) ──
+SITE_URL = env('SITE_URL', default='http://localhost:8000')
+MONGO_URI = env('MONGO_URI', default='')
 MONGO_HOST = env('MONGO_HOST', default='localhost')
 MONGO_PORT = env.int('MONGO_PORT', default=27017)
 MONGO_DB = env('MONGO_DB', default='zayrosnap')
