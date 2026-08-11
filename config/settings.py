@@ -104,6 +104,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+DATA_UPLOAD_MAX_NUMBER_FILES = None
+
 # Celery
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='memory://')
 CELERY_RESULT_BACKEND = 'django-db'

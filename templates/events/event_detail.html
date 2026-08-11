@@ -60,17 +60,21 @@
         </div>
       </div>
       {% endif %}
-      <form method="post" action="{% url 'bulk_upload' event.slug %}" enctype="multipart/form-data">
-        {% csrf_token %}
+      <div id="uploadArea">
         <div class="mb-3">
-          <label class="form-label fw-semibold">Upload photos (multiple allowed)</label>
-          <input type="file" name="photos" class="form-control" multiple accept="image/*" required>
-          <div class="form-text">JPG, PNG, WEBP. Face detection runs in the background after upload.</div>
+          <label class="form-label fw-semibold">Upload photos (unlimited)</label>
+          <input type="file" id="photoInput" class="form-control" multiple accept="image/*">
+          <div class="form-text">JPG, PNG, WEBP. Sent in chunks of 50. Face detection runs in the background.</div>
         </div>
-        <button class="btn btn-dark" type="submit">
+        <button class="btn btn-dark" id="uploadBtn" onclick="startChunkedUpload()" disabled>
           <i class="bi bi-cloud-upload"></i> Upload
         </button>
-      </form>
+        <span id="uploadStatus" class="ms-3 small text-muted"></span>
+        <div class="progress mt-3 d-none" id="chunkProgress">
+          <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
+               id="chunkFill" style="width:0%"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -112,6 +116,62 @@
 
 {% block extra_js %}
 <script>
+// Enable upload button only when files are selected
+document.getElementById('photoInput').addEventListener('change', function(){
+  document.getElementById('uploadBtn').disabled = this.files.length === 0;
+  document.getElementById('uploadStatus').textContent =
+    this.files.length ? `${this.files.length} file(s) selected` : '';
+});
+
+const CHUNK_SIZE = 50;
+const UPLOAD_URL = "{% url 'bulk_upload' event.slug %}";
+const CSRF = "{{ csrf_token }}";
+
+async function startChunkedUpload() {
+  const input = document.getElementById('photoInput');
+  const files = Array.from(input.files);
+  if (!files.length) return;
+
+  const btn = document.getElementById('uploadBtn');
+  const status = document.getElementById('uploadStatus');
+  const progressWrap = document.getElementById('chunkProgress');
+  const fill = document.getElementById('chunkFill');
+
+  btn.disabled = true;
+  progressWrap.classList.remove('d-none');
+
+  let uploaded = 0;
+  const total = files.length;
+  const chunks = [];
+  for (let i = 0; i < total; i += CHUNK_SIZE) chunks.push(files.slice(i, i + CHUNK_SIZE));
+
+  for (let i = 0; i < chunks.length; i++) {
+    const fd = new FormData();
+    chunks[i].forEach(f => fd.append('photos', f));
+
+    status.textContent = `Uploading batch ${i + 1}/${chunks.length}…`;
+    try {
+      const res = await fetch(UPLOAD_URL, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd,
+      });
+      if (!res.ok) throw new Error(`Server error on batch ${i + 1}`);
+      const data = await res.json();
+      uploaded += data.uploaded;
+    } catch (err) {
+      status.textContent = `Error on batch ${i + 1}: ${err.message}`;
+      btn.disabled = false;
+      return;
+    }
+
+    fill.style.width = Math.round((i + 1) / chunks.length * 100) + '%';
+  }
+
+  status.textContent = `✓ ${uploaded} photo(s) uploaded! Reloading…`;
+  setTimeout(() => location.reload(), 1200);
+}
+
 // Poll processing status every 5s while there are unprocessed photos
 (function(){
   const slug = '{{ event.slug }}';
