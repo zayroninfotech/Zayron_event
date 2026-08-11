@@ -20,14 +20,17 @@ from pymongo.database import Database
 
 @lru_cache(maxsize=1)
 def _client() -> MongoClient:
+    uri = getattr(settings, 'MONGO_URI', None)
+    if uri:
+        return MongoClient(uri)
+    # fallback to individual settings
     host = settings.MONGO_HOST
     port = settings.MONGO_PORT
-    user = settings.MONGO_USER
-    password = settings.MONGO_PASSWORD
-    auth_source = settings.MONGO_AUTH_SOURCE
-
+    user = getattr(settings, 'MONGO_USER', '')
+    password = getattr(settings, 'MONGO_PASSWORD', '')
+    auth_source = getattr(settings, 'MONGO_AUTH_SOURCE', 'admin')
     if user and password:
-        return pymongo.MongoClient(
+        return MongoClient(
             host=host, port=port,
             username=user, password=password,
             authSource=auth_source,
