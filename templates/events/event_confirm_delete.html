@@ -13,8 +13,10 @@
   .del-card {
     width: 100%;
     max-width: 440px;
-    background: var(--zs-surface);
-    border: 1px solid var(--zs-border);
+    background: var(--glass-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--zs-radius-lg);
     box-shadow: var(--zs-shadow-md);
     padding: 36px 32px;
@@ -75,8 +77,8 @@
   .btn-del-keep {
     width: 100%;
     padding: 10px;
-    background: none;
-    border: 1px solid var(--zs-border);
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
     font-size: .875rem;
@@ -87,11 +89,12 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    transition: border-color .15s, color .15s;
+    transition: border-color .15s, color .15s, background .15s;
   }
   .btn-del-keep:hover {
     border-color: var(--zs-subtle);
     color: var(--zs-text);
+    background: var(--glass-strong);
   }
   .del-back {
     display: inline-flex;

@@ -42,8 +42,10 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    background: var(--zs-bg);
-    border: 1px solid var(--zs-border);
+    background: var(--glass-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: 99px;
     padding: 4px 12px;
     font-size: .78rem;
@@ -89,9 +91,11 @@
     font-weight: 600;
     padding: 8px 14px;
     border-radius: 8px;
-    border: 1px solid var(--zs-border);
+    border: 1px solid var(--glass-border);
     color: var(--zs-muted);
-    background: var(--zs-surface);
+    background: var(--glass-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     text-decoration: none;
     transition: border-color .15s, color .15s, background .15s;
   }
@@ -130,8 +134,10 @@
   @media (max-width: 576px) { .stats-strip { grid-template-columns: 1fr; } }
 
   .stat-tile {
-    background: var(--zs-surface);
-    border: 1px solid var(--zs-border);
+    background: var(--glass-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--zs-radius);
     box-shadow: var(--zs-shadow);
     padding: 14px 16px;
@@ -163,8 +169,10 @@
 
   /* QR card */
   .qr-card {
-    background: var(--zs-surface);
-    border: 1px solid var(--zs-border);
+    background: var(--glass-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--zs-radius-lg);
     box-shadow: var(--zs-shadow);
     padding: 20px;
@@ -201,26 +209,27 @@
     width: 100%;
     justify-content: center;
     padding: 8px 16px;
-    border: 1px solid var(--zs-border);
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
     font-size: .82rem;
     font-weight: 600;
     color: var(--zs-muted);
     text-decoration: none;
-    background: var(--zs-bg);
-    transition: border-color .15s, color .15s;
+    background: var(--glass-subtle);
+    transition: border-color .15s, color .15s, background .15s;
   }
   .btn-qr-download:hover {
     border-color: var(--zs-violet);
     color: var(--zs-violet);
+    background: var(--zs-violet-lt);
   }
   .qr-link-row {
     display: flex;
     align-items: center;
     gap: 6px;
     width: 100%;
-    background: var(--zs-bg);
-    border: 1px solid var(--zs-border);
+    background: var(--glass-subtle);
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
     padding: 6px 10px;
   }
@@ -248,8 +257,10 @@
 
   /* Upload card */
   .upload-card {
-    background: var(--zs-surface);
-    border: 1px solid var(--zs-border);
+    background: var(--glass-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--zs-radius-lg);
     box-shadow: var(--zs-shadow);
     padding: 20px;
@@ -337,7 +348,7 @@
 
   /* Drop zone */
   #dropZone {
-    border: 1.5px dashed #C8CDD8;
+    border: 1.5px dashed rgba(99,91,235,.35);
     border-radius: var(--zs-radius);
     padding: 28px 20px;
     text-align: center;
@@ -348,7 +359,7 @@
     align-items: center;
     gap: 6px;
     color: var(--zs-muted);
-    background: var(--zs-bg);
+    background: var(--glass-subtle);
   }
   #dropZone:hover,
   #dropZone.drag-over {
@@ -405,8 +416,8 @@
   .photo-count-badge {
     display: inline-flex;
     align-items: center;
-    background: var(--zs-bg);
-    border: 1px solid var(--zs-border);
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
     color: var(--zs-muted);
     font-size: .72rem;
     font-weight: 600;
@@ -512,8 +523,10 @@
   .photos-empty {
     text-align: center;
     padding: 48px 24px;
-    background: var(--zs-surface);
-    border: 1px solid var(--zs-border);
+    background: var(--glass-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--zs-radius-lg);
   }
   .photos-empty-icon {
