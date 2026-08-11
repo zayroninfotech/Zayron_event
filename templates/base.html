@@ -128,6 +128,23 @@
       gap: 10px;
       flex-shrink: 0;
     }
+    .zs-nav-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--zs-violet);
+      color: #fff;
+      font-size: .82rem;
+      font-weight: 600;
+      border-radius: var(--zs-radius-sm);
+      padding: 7px 14px;
+      text-decoration: none;
+      transition: background .15s, transform .1s;
+      flex-shrink: 0;
+    }
+    .zs-nav-cta:hover { background: var(--zs-violet-dark); color: #fff; }
+    .zs-nav-cta:active { transform: scale(.97); }
+
     .zs-avatar {
       width: 34px;
       height: 34px;
@@ -196,7 +213,8 @@
     @media (max-width: 768px) {
       .zs-nav-center { display: none; }
       .zs-nav-right .zs-avatar,
-      .zs-nav-right .zs-signout-btn { display: none; }
+      .zs-nav-right .zs-signout-btn,
+      .zs-nav-right .zs-nav-cta { display: none; }
       .zs-toggler { display: flex; align-items: center; }
     }
 
@@ -367,15 +385,18 @@
 
     {% if user.is_authenticated %}
     <div class="zs-nav-center">
-      <a href="{% url 'dashboard' %}" class="zs-nav-link">
+      <a href="{% url 'dashboard' %}" class="zs-nav-link{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}">
         <i class="bi bi-grid-1x2"></i> Dashboard
       </a>
-      <a href="{% url 'event_create' %}" class="zs-nav-link">
-        <i class="bi bi-plus-circle"></i> New Event
+      <a href="{% url 'dashboard' %}" class="zs-nav-link">
+        <i class="bi bi-calendar-event"></i> Events
       </a>
     </div>
 
     <div class="zs-nav-right">
+      <a href="{% url 'event_create' %}" class="zs-nav-cta">
+        <i class="bi bi-plus-lg"></i> New Event
+      </a>
       <div class="zs-avatar">{{ user.username|slice:":1" }}</div>
       <form method="post" action="{% url 'logout' %}" class="zs-signout-form">
         {% csrf_token %}

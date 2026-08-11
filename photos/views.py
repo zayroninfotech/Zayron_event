@@ -1,6 +1,9 @@
+import io
+import os
+import zipfile
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse, Http404
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from events.models import Event
@@ -44,6 +47,42 @@ def photo_status(request, slug):
         'processed': event.processed_photos,
         'photos': list(photos),
     })
+
+
+@login_required
+def download_photo(request, photo_id):
+    photo = get_object_or_404(EventPhoto, pk=photo_id, event__created_by=request.user)
+    if not photo.image:
+        raise Http404('Photo file not found.')
+    response = FileResponse(open(photo.image.path, 'rb'), as_attachment=True)
+    response['Content-Disposition'] = f'attachment; filename="{os.path.basename(photo.image.name)}"'
+    return response
+
+
+@login_required
+def download_all_photos(request, slug):
+    event = get_object_or_404(Event, slug=slug, created_by=request.user)
+    photos = event.photos.filter(image__isnull=False).exclude(image='')
+
+    if not photos.exists():
+        raise Http404('No photos to download.')
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, mode='w', compression=zipfile.ZIP_DEFLATED) as zf:
+        for photo in photos:
+            try:
+                zf.write(photo.image.path, os.path.basename(photo.image.name))
+            except FileNotFoundError:
+                continue
+    buf.seek(0)
+
+    response = FileResponse(
+        buf,
+        as_attachment=True,
+        filename=f'{event.slug}_photos.zip',
+        content_type='application/zip',
+    )
+    return response
 
 
 @login_required
