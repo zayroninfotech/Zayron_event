@@ -114,10 +114,7 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_IGNORE_RESULT = True
-# Run tasks synchronously in the web process — no Redis or worker needed for local dev.
-# Remove this (or set to False) in production and run: celery -A config worker
-CELERY_TASK_ALWAYS_EAGER = True
-CELERY_TASK_EAGER_PROPAGATES = False  # don't let task errors crash the request
+CELERY_TASK_ALWAYS_EAGER = False
 
 # Auth redirects
 LOGIN_URL = '/accounts/login/'

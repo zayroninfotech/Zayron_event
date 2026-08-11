@@ -4,126 +4,435 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Photos — {{ event.name }}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    :root { --zs-navy:#0b1f4f; --zs-blue:#1a4db5; --zs-gold:#c9a227; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --violet:      #6C5CE7;
+      --violet-dark: #5A4BD1;
+      --violet-lt:   #EDE9FF;
+      --blue:        #3B82F6;
+      --text:        #101828;
+      --muted:       #667085;
+      --subtle:      #98A2B3;
+      --border:      #E7E9F0;
+      --bg:          #F7F8FC;
+      --surface:     #FFFFFF;
+      --success:     #22C55E;
+    }
+
     body {
-      background: linear-gradient(160deg, #0b1f4f 0%, #1a3a80 60%, #0d2a69 100%);
-      color: #fff;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--surface);
+      color: var(--text);
       min-height: 100vh;
     }
-    .zs-header {
-      padding: 1.5rem 1rem 1.2rem;
-      text-align: center;
-      border-bottom: 2px solid rgba(201,162,39,.35);
-    }
-    .zs-brand { font-size:.75rem; letter-spacing:.15em; color:var(--zs-gold); text-transform:uppercase; font-weight:700; }
-    .zs-header h4 { font-weight:800; color:#fff; margin:.3rem 0 0; }
 
-    .photo-card { position: relative; }
-    .photo-card img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px; border:2px solid rgba(201,162,39,.3); }
-    .photo-card img:hover { border-color:var(--zs-gold); }
-    .dl-btn {
-      position:absolute; bottom:6px; right:6px;
-      background: var(--zs-gold); border:none; border-radius:6px;
-      color:#0b1f4f; font-size:.75rem; padding:4px 8px; font-weight:700;
-      opacity:.9;
+    /* ── Header ── */
+    .zs-header {
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--border);
     }
-    .dl-btn:hover { opacity:1; background:#e8b52e; color:#0b1f4f; }
+    .zs-logo-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--violet), var(--blue));
+      display: grid; place-items: center; color: #fff; font-size: .85rem;
+    }
+    .zs-logo-text { font-size: .95rem; font-weight: 800; letter-spacing: -.2px; }
+    .zs-logo-text span { color: var(--violet); }
+
+    /* ── Loading screen ── */
+    #loadingScreen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 62px);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+    }
+
+    /* Scan pulse */
+    .scan-wrap {
+      position: relative;
+      width: 100px; height: 100px;
+      margin: 0 auto 2rem;
+    }
+    .scan-ring {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      border: 2px solid var(--violet-lt);
+    }
+    .scan-ring-1 { animation: scanPulse 2s ease-out infinite; }
+    .scan-ring-2 { animation: scanPulse 2s ease-out infinite .65s; }
+    .scan-ring-3 { animation: scanPulse 2s ease-out infinite 1.3s; }
+    @keyframes scanPulse {
+      0%   { transform: scale(.55); opacity: .9; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .scan-center {
+      position: absolute; inset: 22px;
+      border-radius: 50%;
+      background: var(--violet-lt);
+      border: 1.5px solid var(--violet);
+      display: grid; place-items: center;
+      font-size: 1.6rem;
+      color: var(--violet);
+    }
+
+    .loading-title { font-size: 1.15rem; font-weight: 800; margin-bottom: .4rem; }
+    .loading-sub   { font-size: .85rem; color: var(--muted); margin-bottom: 2rem; }
+
+    /* Step checklist */
+    .step-list {
+      list-style: none;
+      width: 100%;
+      max-width: 300px;
+      text-align: left;
+    }
+    .step-list li {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .55rem .5rem;
+      border-radius: 10px;
+      font-size: .88rem;
+      color: var(--subtle);
+      transition: color .3s;
+    }
+    .step-list li.active { color: var(--text); font-weight: 600; }
+    .step-list li.done  { color: var(--muted); }
+    .step-icon {
+      width: 26px; height: 26px; min-width: 26px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      display: grid; place-items: center;
+      font-size: .72rem;
+      transition: all .35s;
+    }
+    .step-list li.active .step-icon { background: var(--violet-lt); border-color: var(--violet); color: var(--violet); }
+    .step-list li.done  .step-icon { background: var(--violet-lt); border-color: var(--violet); color: var(--violet); }
+    .step-spinner {
+      width: 26px; height: 26px; min-width: 26px;
+      border-radius: 50%;
+      border: 2px solid var(--violet-lt);
+      border-top-color: var(--violet);
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Results screen ── */
+    #resultsScreen { display: none; padding: 1.5rem 1.25rem; }
+
+    .results-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.25rem; flex-wrap: wrap; gap: .75rem;
+    }
+    .results-title { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: .5rem; }
+    .results-title i { color: var(--success); }
 
     .btn-zip {
-      background: linear-gradient(135deg, var(--zs-gold), #e8b52e);
-      color: #0b1f4f; font-weight:700; border:none; border-radius:50px;
-      padding:.5rem 1.5rem;
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: var(--violet);
+      color: #fff; font-weight: 700; font-size: .82rem;
+      border: none; border-radius: 10px; padding: .55rem 1.1rem;
+      text-decoration: none; transition: background .15s;
     }
-    .btn-zip:hover { opacity:.9; color:#0b1f4f; }
+    .btn-zip:hover { background: var(--violet-dark); color: #fff; }
 
-    .spinner-wrap { min-height:50vh; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .6rem; }
+    .photo-card { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .photo-card img {
+      width: 100%; aspect-ratio: 1; object-fit: cover;
+      display: block; transition: transform .2s;
+    }
+    .photo-card:hover img { transform: scale(1.03); }
+    .photo-dl {
+      position: absolute; bottom: 6px; right: 6px;
+      background: rgba(16,24,40,.72); backdrop-filter: blur(3px);
+      border: none; border-radius: 8px;
+      color: #fff; font-size: .8rem; padding: 5px 8px;
+      text-decoration: none;
+      opacity: 0; transition: opacity .15s;
+    }
+    .photo-card:hover .photo-dl { opacity: 1; }
 
-    .zs-footer { text-align:center; padding:1.5rem; color:rgba(255,255,255,.3); font-size:.78rem; }
-    .zs-footer span { color:var(--zs-gold); }
+    /* ── State screens ── */
+    .state-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 62px);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+    }
+    .state-icon-wrap {
+      width: 68px; height: 68px;
+      border-radius: 20px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: grid; place-items: center;
+      font-size: 1.8rem;
+      color: var(--subtle);
+      margin: 0 auto 1.25rem;
+    }
+    .state-icon-wrap.warn { background: #FEF3C7; color: #D97706; }
+    .state-title { font-size: 1.15rem; font-weight: 800; margin-bottom: .5rem; }
+    .state-sub   { font-size: .86rem; color: var(--muted); max-width: 300px; margin-bottom: 1.75rem; line-height: 1.6; }
+    .btn-retry {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--violet);
+      color: #fff; font-weight: 700; font-size: .92rem;
+      border: none; border-radius: 12px; padding: .75rem 2rem;
+      text-decoration: none; transition: background .15s;
+    }
+    .btn-retry:hover { background: var(--violet-dark); color: #fff; }
+
+    .tip-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.1rem 1.3rem;
+      max-width: 300px;
+      text-align: left;
+      margin-top: 1.75rem;
+    }
+    .tip-card .tip-title { font-size: .72rem; font-weight: 700; color: var(--violet); letter-spacing: .05em; text-transform: uppercase; margin-bottom: .6rem; }
+    .tip-card ul { padding-left: 1.1rem; margin: 0; }
+    .tip-card li { font-size: .8rem; color: var(--muted); margin-bottom: .35rem; line-height: 1.45; }
+
+    /* ── Footer ── */
+    .zs-footer { text-align: center; padding: 1.5rem; color: var(--subtle); font-size: .75rem; }
+    .zs-footer span { color: var(--violet); }
+
+    /* ── Fade-in ── */
+    .fade-in { animation: fi .45s ease forwards; }
+    @keyframes fi { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
-<div class="zs-header mb-4">
-  <div class="zs-brand">📸 ZayroSnap</div>
-  <h4>{{ event.name }}</h4>
+<header class="zs-header">
+  <div class="zs-logo-icon"><i class="bi bi-camera"></i></div>
+  <div class="zs-logo-text">Zayro<span>Snap</span></div>
+</header>
+
+<!-- ══════════════ LOADING SCREEN ══════════════ -->
+<div id="loadingScreen">
+  <div class="scan-wrap">
+    <div class="scan-ring scan-ring-1"></div>
+    <div class="scan-ring scan-ring-2"></div>
+    <div class="scan-ring scan-ring-3"></div>
+    <div class="scan-center"><i class="bi bi-person-bounding-box"></i></div>
+  </div>
+
+  <div class="loading-title">Looking for your moments…</div>
+  <div class="loading-sub">This usually takes 10–30 seconds</div>
+
+  <ul class="step-list" id="stepList">
+    <li id="sl1" class="active">
+      <div class="step-spinner" id="sl1-icon"></div>
+      <span>Detecting your face</span>
+    </li>
+    <li id="sl2">
+      <div class="step-icon" id="sl2-icon"><i class="bi bi-fingerprint"></i></div>
+      <span>Checking image quality</span>
+    </li>
+    <li id="sl3">
+      <div class="step-icon" id="sl3-icon"><i class="bi bi-cpu"></i></div>
+      <span>Generating your face ID</span>
+    </li>
+    <li id="sl4">
+      <div class="step-icon" id="sl4-icon"><i class="bi bi-search"></i></div>
+      <span>Searching event photos</span>
+    </li>
+    <li id="sl5">
+      <div class="step-icon" id="sl5-icon"><i class="bi bi-people"></i></div>
+      <span>Matching your photos</span>
+    </li>
+  </ul>
 </div>
 
-<div class="container pb-5" style="max-width:620px;">
-
-{% if upload.status == 'done' %}
-  {% if matches %}
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-      <h5 class="mb-0 fw-bold">
-        <i class="bi bi-check-circle-fill" style="color:var(--zs-gold);"></i>
-        {{ matches|length }} photo{{ matches|length|pluralize }} found!
-      </h5>
-      <a href="{% url 'download_zip' event.slug upload.pk %}" class="btn-zip">
-        <i class="bi bi-file-zip"></i> Download All (ZIP)
+<!-- ══════════════ RESULTS SCREEN ══════════════ -->
+<div id="resultsScreen">
+  <div class="results-header">
+    <div class="results-title">
+      <i class="bi bi-check-circle-fill"></i>
+      Found <span id="matchCount">0</span> photo<span id="matchPlural">s</span>
+    </div>
+    <a href="{% url 'download_zip' event.slug upload.pk %}" class="btn-zip">
+      <i class="bi bi-file-zip"></i> Download All
+    </a>
+  </div>
+  <div class="photo-grid" id="photoGrid">
+    {% for match in matches %}
+    <div class="photo-card">
+      {% if match.photo.thumbnail %}
+        <img src="{{ match.photo.thumbnail.url }}" alt="Photo" loading="lazy">
+      {% else %}
+        <img src="{{ match.photo.image.url }}" alt="Photo" loading="lazy">
+      {% endif %}
+      <a href="{% url 'download_photo' event.slug match.photo.pk %}" class="photo-dl" title="Download">
+        <i class="bi bi-download"></i>
       </a>
     </div>
-    <div class="row g-2">
-      {% for match in matches %}
-      <div class="col-6 col-sm-4">
-        <div class="photo-card">
-          {% if match.photo.thumbnail %}
-            <img src="{{ match.photo.thumbnail.url }}" alt="Photo" loading="lazy">
-          {% else %}
-            <img src="{{ match.photo.image.url }}" alt="Photo" loading="lazy">
-          {% endif %}
-          <a href="{% url 'download_photo' event.slug match.photo.pk %}" class="dl-btn" title="Download">
-            <i class="bi bi-download"></i>
-          </a>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-
-  {% else %}
-    <div class="text-center py-5">
-      <div style="font-size:3.5rem;">😕</div>
-      <h5 class="mt-3 fw-bold">No matches found</h5>
-      <p style="color:rgba(255,255,255,.6);">We couldn't find your face in the event photos. Make sure your selfie is clear and well-lit.</p>
-      <a href="{% url 'guest_upload' event.slug %}" class="btn-zip mt-3 d-inline-block text-decoration-none">Try Again</a>
-    </div>
-  {% endif %}
-
-{% elif upload.status == 'failed' %}
-  <div class="text-center py-5">
-    <div style="font-size:3.5rem;">❌</div>
-    <h5 class="mt-3 fw-bold">Something went wrong</h5>
-    <p style="color:rgba(255,255,255,.6);">We couldn't process your selfie. Please try again.</p>
-    <a href="{% url 'guest_upload' event.slug %}" class="btn-zip mt-3 d-inline-block text-decoration-none">Try Again</a>
+    {% endfor %}
   </div>
+</div>
 
-{% else %}
-  <div class="spinner-wrap text-center">
-    <div class="spinner-border mb-3" style="width:3.5rem;height:3.5rem;color:var(--zs-gold);"></div>
-    <h5 class="fw-bold">Searching your photos…</h5>
-    <p style="color:rgba(255,255,255,.6); font-size:.9rem;">This usually takes 10–30 seconds.</p>
+<!-- ══════════════ NO MATCH ══════════════ -->
+<div class="state-screen" id="noMatchScreen">
+  <div class="state-icon-wrap"><i class="bi bi-search"></i></div>
+  <div class="state-title">We couldn't find your photos</div>
+  <div class="state-sub">Try another selfie with your face clearly visible and well-lit.</div>
+  <a href="{% url 'guest_upload' event.slug %}" class="btn-retry">
+    <i class="bi bi-arrow-repeat"></i> Try Again
+  </a>
+  <div class="tip-card">
+    <div class="tip-title">Tips for a better selfie</div>
+    <ul>
+      <li>Face the light source — avoid backlight</li>
+      <li>Keep your face centered and uncovered</li>
+      <li>Remove sunglasses or hats</li>
+      <li>Match the lighting conditions of the event</li>
+    </ul>
   </div>
-{% endif %}
+</div>
 
+<!-- ══════════════ NO FACE DETECTED ══════════════ -->
+<div class="state-screen" id="noFaceScreen">
+  <div class="state-icon-wrap warn"><i class="bi bi-camera-fill"></i></div>
+  <div class="state-title">No face detected</div>
+  <div class="state-sub">Please position your face inside the frame and try again.</div>
+  <a href="{% url 'guest_upload' event.slug %}" class="btn-retry">
+    <i class="bi bi-camera-fill"></i> Retake Selfie
+  </a>
+  <div class="tip-card">
+    <div class="tip-title">Make sure your selfie</div>
+    <ul>
+      <li>Shows your full face, not just a profile</li>
+      <li>Is in focus and not blurry</li>
+      <li>Has good lighting — avoid very dark photos</li>
+      <li>Shows only you, not a group photo</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════ FAILED ══════════════ -->
+<div class="state-screen" id="failedScreen">
+  <div class="state-icon-wrap warn"><i class="bi bi-exclamation-triangle"></i></div>
+  <div class="state-title">Something went wrong</div>
+  <div class="state-sub">An unexpected error occurred while processing your selfie. Please try again.</div>
+  <a href="{% url 'guest_upload' event.slug %}" class="btn-retry">
+    <i class="bi bi-arrow-repeat"></i> Try Again
+  </a>
 </div>
 
 <div class="zs-footer">© 2026 <span>ZayroSnap</span> — Powered by Zayron Infotech</div>
 
-{% if upload.status not in 'done,failed' %}
 <script>
-(function poll(){
-  fetch('/event/api/status/{{ upload.pk }}/')
-    .then(r => r.json())
-    .then(data => {
-      if(data.status === 'done' || data.status === 'failed') location.reload();
-      else setTimeout(poll, 3000);
-    })
-    .catch(() => setTimeout(poll, 5000));
-})();
+const INITIAL_STATUS = "{{ upload.status }}";
+const MATCH_COUNT    = {{ matches|length }};
+const POLL_URL       = "/event/api/status/{{ upload.pk }}/";
+const UPLOAD_SLUG    = "{{ event.slug }}";
+
+const STEP_DELAYS = [0, 2500, 5000, 8000, 12000];
+
+function stepDoneIcon(i) {
+  return `<div class="step-icon" id="sl${i}-icon" style="background:var(--violet-lt);border-color:var(--violet);color:var(--violet);"><i class="bi bi-check-lg"></i></div>`;
+}
+
+function activateStep(n) {
+  for (let i = 1; i <= 5; i++) {
+    const li   = document.getElementById('sl' + i);
+    const icon = document.getElementById('sl' + i + '-icon');
+    li.classList.remove('active', 'done');
+    if (i < n) {
+      li.classList.add('done');
+      icon.outerHTML = stepDoneIcon(i);
+    } else if (i === n) {
+      li.classList.add('active');
+      icon.outerHTML = `<div class="step-spinner" id="sl${i}-icon"></div>`;
+    }
+  }
+}
+
+function showResults(matchCount) {
+  for (let i = 1; i <= 5; i++) {
+    const li = document.getElementById('sl' + i);
+    if (li) { li.classList.remove('active'); li.classList.add('done'); }
+    const icon = document.getElementById('sl' + i + '-icon');
+    if (icon) icon.outerHTML = stepDoneIcon(i);
+  }
+
+  setTimeout(() => {
+    document.getElementById('loadingScreen').style.display = 'none';
+    if (matchCount > 0) {
+      document.getElementById('matchCount').textContent = matchCount;
+      document.getElementById('matchPlural').textContent = matchCount === 1 ? '' : 's';
+      const rs = document.getElementById('resultsScreen');
+      rs.style.display = 'block';
+      rs.classList.add('fade-in');
+    } else {
+      const nm = document.getElementById('noMatchScreen');
+      nm.style.display = 'flex';
+      nm.classList.add('fade-in');
+    }
+  }, 600);
+}
+
+function showState(id) {
+  document.getElementById('loadingScreen').style.display = 'none';
+  const el = document.getElementById(id);
+  el.style.display = 'flex';
+  el.classList.add('fade-in');
+}
+
+function handleStatus(status, matchCount) {
+  if (status === 'done') {
+    showResults(matchCount);
+  } else if (status === 'no_face') {
+    showState('noFaceScreen');
+  } else if (status === 'failed') {
+    showState('failedScreen');
+  }
+}
+
+if (['done', 'no_face', 'failed'].includes(INITIAL_STATUS)) {
+  let s = 1;
+  const quickInterval = setInterval(() => {
+    activateStep(s++);
+    if (s > 5) {
+      clearInterval(quickInterval);
+      handleStatus(INITIAL_STATUS, MATCH_COUNT);
+    }
+  }, 300);
+} else {
+  STEP_DELAYS.forEach((delay, i) => {
+    setTimeout(() => activateStep(i + 1), delay);
+  });
+
+  let pollCount = 0;
+  function poll() {
+    fetch(POLL_URL)
+      .then(r => r.json())
+      .then(data => {
+        if (data.terminal) {
+          handleStatus(data.status, data.match_count || 0);
+        } else {
+          pollCount++;
+          setTimeout(poll, pollCount < 6 ? 3000 : 5000);
+        }
+      })
+      .catch(() => setTimeout(poll, 5000));
+  }
+  setTimeout(poll, 3000);
+}
 </script>
-{% endif %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

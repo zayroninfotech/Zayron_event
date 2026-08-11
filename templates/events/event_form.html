@@ -1,27 +1,189 @@
 {% extends 'base.html' %}
 {% block title %}{{ action }} Event — ZayroSnap{% endblock %}
+
+{% block extra_css %}
+<style>
+  .ef-wrap {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .ef-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .82rem;
+    color: var(--zs-muted);
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: color .15s;
+  }
+  .ef-back:hover { color: var(--zs-violet); }
+
+  .ef-header { margin-bottom: 24px; }
+  .ef-header h1 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--zs-text);
+    letter-spacing: -.3px;
+    margin-bottom: 4px;
+  }
+  .ef-header p {
+    font-size: .875rem;
+    color: var(--zs-muted);
+    margin: 0;
+  }
+
+  .ef-card {
+    background: var(--zs-surface);
+    border: 1px solid var(--zs-border);
+    border-radius: var(--zs-radius-lg);
+    box-shadow: var(--zs-shadow);
+    padding: 28px 28px 24px;
+  }
+
+  .ef-field { margin-bottom: 20px; }
+  .ef-label {
+    display: block;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--zs-text);
+    margin-bottom: 6px;
+  }
+  .ef-card .form-control,
+  .ef-card textarea.form-control {
+    width: 100%;
+    padding: 10px 13px;
+    font-size: .9rem;
+    border: 1.5px solid var(--zs-border);
+    border-radius: 8px;
+    background: var(--zs-bg);
+    color: var(--zs-text);
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    display: block;
+  }
+  .ef-card .form-control:focus,
+  .ef-card textarea.form-control:focus {
+    border-color: var(--zs-violet);
+    box-shadow: 0 0 0 3px rgba(108,92,231,.12);
+    background: var(--zs-surface);
+  }
+  .ef-card .form-control::placeholder { color: var(--zs-subtle); }
+  .ef-card textarea.form-control { resize: vertical; min-height: 90px; }
+  .ef-field .form-text { font-size: .76rem; color: var(--zs-subtle); margin-top: 5px; }
+  .ef-field .text-danger { font-size: .78rem; margin-top: 4px; }
+
+  .ef-divider {
+    border: none;
+    border-top: 1px solid var(--zs-border);
+    margin: 24px 0 20px;
+  }
+
+  .ef-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .btn-ef-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--zs-violet);
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: background .15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-ef-submit:hover { background: var(--zs-violet-dark); }
+  .btn-ef-cancel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px solid var(--zs-border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--zs-muted);
+    text-decoration: none;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-ef-cancel:hover {
+    border-color: var(--zs-subtle);
+    color: var(--zs-text);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-8 col-lg-6">
-    <div class="card p-4">
-      <h4 class="fw-bold mb-1" style="color:var(--zs-navy);">{{ action }} Event</h4>
-      <p class="text-muted small mb-4">Fill in the event details below.</p>
-      <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-          <div class="mb-3">
-            <label class="form-label fw-semibold" style="color:var(--zs-navy);">{{ field.label }}</label>
-            {{ field }}
-            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
-            {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors }}</div>{% endif %}
-          </div>
-        {% endfor %}
-        <div class="d-flex gap-2 mt-4">
-          <button class="btn btn-gold px-4 fw-semibold" type="submit">{{ action }}</button>
-          <a href="{% url 'dashboard' %}" class="btn btn-outline-dark">Cancel</a>
-        </div>
-      </form>
-    </div>
+<div class="ef-wrap">
+
+  <!-- Back link -->
+  <a href="{% url 'dashboard' %}" class="ef-back">
+    <i class="bi bi-arrow-left"></i> Back to Dashboard
+  </a>
+
+  <!-- Page header -->
+  <div class="ef-header">
+    <h1>
+      {% if action == 'Edit' %}
+        Edit Event
+      {% else %}
+        Create a New Event
+      {% endif %}
+    </h1>
+    <p>
+      {% if action == 'Edit' %}
+        Update your event details.
+      {% else %}
+        Set up your event and start collecting moments.
+      {% endif %}
+    </p>
   </div>
+
+  <!-- Form card -->
+  <div class="ef-card">
+    <form method="post">
+      {% csrf_token %}
+
+      {% for field in form %}
+        <div class="ef-field">
+          <label class="ef-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+            <div class="form-text">{{ field.help_text }}</div>
+          {% endif %}
+          {% if field.errors %}
+            <div class="text-danger small">{{ field.errors }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <hr class="ef-divider">
+
+      <div class="ef-actions">
+        <button type="submit" class="btn-ef-submit">
+          <i class="bi bi-check-lg"></i> {{ action }} Event
+        </button>
+        {% if action == 'Edit' and event %}
+          <a href="{% url 'event_detail' event.slug %}" class="btn-ef-cancel">
+            Cancel
+          </a>
+        {% else %}
+          <a href="{% url 'dashboard' %}" class="btn-ef-cancel">
+            Cancel
+          </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
 </div>
 {% endblock %}

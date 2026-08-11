@@ -8,7 +8,13 @@ from .forms import EventForm
 @login_required
 def dashboard(request):
     events = Event.objects.filter(created_by=request.user)
-    return render(request, 'events/dashboard.html', {'events': events})
+    total_photos = sum(e.total_photos for e in events)
+    total_searches = sum(e.guest_uploads.count() for e in events)
+    return render(request, 'events/dashboard.html', {
+        'events': events,
+        'total_photos': total_photos,
+        'total_searches': total_searches,
+    })
 
 
 @login_required

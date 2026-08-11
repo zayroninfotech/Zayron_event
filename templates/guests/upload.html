@@ -4,155 +4,342 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Find My Photos — {{ event.name }}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --zs-navy: #0b1f4f;
-      --zs-blue: #1a4db5;
-      --zs-gold: #c9a227;
+      --violet:      #6C5CE7;
+      --violet-dark: #5A4BD1;
+      --violet-lt:   #EDE9FF;
+      --blue:        #3B82F6;
+      --text:        #101828;
+      --muted:       #667085;
+      --subtle:      #98A2B3;
+      --border:      #E7E9F0;
+      --bg:          #F7F8FC;
+      --surface:     #FFFFFF;
+      --danger:      #EF4444;
     }
-    * { box-sizing: border-box; }
+
     body {
-      background: linear-gradient(160deg, #0b1f4f 0%, #1a3a80 60%, #0d2a69 100%);
-      color: #fff;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--surface);
+      color: var(--text);
       min-height: 100vh;
-      font-family: system-ui, sans-serif;
     }
 
     /* Header */
     .zs-header {
-      padding: 2rem 1rem 1.5rem;
-      text-align: center;
-      border-bottom: 2px solid rgba(201,162,39,.35);
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--border);
     }
-    .zs-brand { font-size: .8rem; letter-spacing: .15em; color: var(--zs-gold); text-transform: uppercase; font-weight: 700; }
-    .zs-header h2 { font-weight: 800; color: #fff; margin: .3rem 0 .2rem; }
-    .zs-header .sub { color: rgba(255,255,255,.6); font-size: .9rem; }
-    .zs-header .tagline { color: rgba(255,255,255,.85); margin-top: .5rem; font-size: 1rem; }
+    .zs-logo-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--violet), var(--blue));
+      display: grid; place-items: center; color: #fff; font-size: .85rem;
+    }
+    .zs-logo-text { font-size: .95rem; font-weight: 800; letter-spacing: -.2px; }
+    .zs-logo-text span { color: var(--violet); }
+    .zs-back {
+      margin-left: auto; color: var(--muted); font-size: .85rem;
+      text-decoration: none; display: flex; align-items: center; gap: 5px;
+      transition: color .15s;
+    }
+    .zs-back:hover { color: var(--violet); }
+
+    /* Step indicator */
+    .step-bar {
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px 16px 8px; max-width: 380px; margin: 0 auto;
+    }
+    .sbar-step { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+    .sbar-step:not(:last-child)::after {
+      content: ''; position: absolute; top: 14px; left: 50%;
+      width: 100%; height: 2px; background: var(--border); z-index: 0;
+    }
+    .sbar-step.done::after, .sbar-step.active::after { background: var(--violet-lt); }
+    .sbar-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surface); border: 1.5px solid var(--border);
+      display: grid; place-items: center;
+      font-size: .75rem; font-weight: 700; color: var(--subtle);
+      position: relative; z-index: 1; transition: all .3s;
+    }
+    .sbar-step.active .sbar-dot { background: var(--violet); border-color: var(--violet); color: #fff; }
+    .sbar-step.done .sbar-dot { background: var(--violet-lt); border-color: var(--violet); color: var(--violet); }
+    .sbar-lbl { font-size: .68rem; color: var(--subtle); margin-top: 6px; text-align: center; font-weight: 500; }
+    .sbar-step.active .sbar-lbl { color: var(--violet); font-weight: 700; }
+    .sbar-step.done .sbar-lbl { color: var(--muted); }
 
     /* Card */
-    .zs-card {
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(201,162,39,.25);
-      border-radius: 16px;
-      padding: 1.5rem;
-      backdrop-filter: blur(6px);
-    }
+    .upload-card { max-width: 460px; margin: 1.5rem auto 0; padding: 0 20px; }
 
-    /* Upload zone */
+    /* Consent panel */
+    .consent-panel {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin-bottom: 20px;
+    }
+    .consent-icon {
+      width: 52px; height: 52px;
+      background: var(--violet-lt);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: 1.4rem;
+      margin: 0 auto 16px;
+      color: var(--violet);
+    }
+    .consent-title { text-align: center; font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; }
+    .consent-text { font-size: .85rem; color: var(--muted); text-align: center; line-height: 1.6; margin-bottom: 20px; }
+    .consent-check {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .consent-check:hover { border-color: var(--violet); }
+    .consent-check input[type=checkbox] { display: none; }
+    .check-box {
+      width: 20px; height: 20px; min-width: 20px;
+      border: 1.5px solid var(--subtle);
+      border-radius: 5px;
+      display: grid; place-items: center;
+      transition: all .2s;
+    }
+    .check-box i { color: #fff; font-size: .65rem; display: none; }
+    .consent-check.checked .check-box { background: var(--violet); border-color: var(--violet); }
+    .consent-check.checked .check-box i { display: block; }
+    .check-label { font-size: .82rem; color: var(--text); line-height: 1.5; }
+
+    /* Selfie section */
+    .selfie-section { display: none; }
+    .selfie-section.visible { display: block; }
+
     .upload-zone {
-      border: 2px dashed rgba(201,162,39,.5);
-      border-radius: 14px;
+      border: 1.5px dashed var(--border);
+      border-radius: 16px;
       padding: 2rem 1rem;
       text-align: center;
       cursor: pointer;
       transition: border-color .2s, background .2s;
+      margin-bottom: 1rem;
     }
-    .upload-zone:hover { border-color: var(--zs-gold); background: rgba(201,162,39,.06); }
+    .upload-zone:hover { border-color: var(--violet); background: var(--violet-lt); }
+    .upload-zone.has-image { border-style: solid; border-color: var(--violet); }
+
     .selfie-preview {
-      width: 140px; height: 140px;
+      width: 130px; height: 130px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid var(--zs-gold);
+      border: 3px solid var(--violet);
       display: none;
       margin: 0 auto .75rem;
     }
+    .zone-icon { font-size: 2.2rem; color: var(--violet); margin-bottom: .5rem; }
+    .zone-text { font-size: .88rem; font-weight: 600; color: var(--text); }
+    .zone-sub  { font-size: .78rem; color: var(--subtle); margin-top: .3rem; }
 
-    /* Inputs */
-    .form-control {
-      background: rgba(255,255,255,.1);
-      border: 1px solid rgba(255,255,255,.2);
-      color: #fff;
+    /* Optional fields */
+    .opt-fields { margin-bottom: 1rem; }
+    .opt-label { font-size: .72rem; font-weight: 700; color: var(--subtle); letter-spacing: .06em; text-transform: uppercase; margin-bottom: .6rem; }
+    .zs-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
       border-radius: 10px;
+      color: var(--text);
+      padding: .65rem .9rem;
+      font-size: .9rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color .15s, background .15s;
+      margin-bottom: .6rem;
     }
-    .form-control::placeholder { color: rgba(255,255,255,.45); }
-    .form-control:focus { background: rgba(255,255,255,.15); border-color: var(--zs-gold); color: #fff; box-shadow: none; }
+    .zs-input::placeholder { color: var(--subtle); }
+    .zs-input:focus { border-color: var(--violet); background: var(--surface); }
 
-    /* Consent box */
-    .consent-box {
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(201,162,39,.3);
-      border-radius: 10px;
-      padding: 1rem;
-      font-size: .85rem;
-      color: rgba(255,255,255,.8);
-    }
-    .form-check-input:checked { background-color: var(--zs-gold); border-color: var(--zs-gold); }
-
-    /* Button */
+    /* Submit button */
     .btn-snap {
-      background: linear-gradient(135deg, var(--zs-gold) 0%, #e8b52e 100%);
-      color: #0b1f4f;
+      width: 100%;
+      background: var(--violet);
+      color: #fff;
       font-weight: 700;
-      font-size: 1.05rem;
+      font-size: 1rem;
       border: none;
-      border-radius: 50px;
-      padding: .75rem 2rem;
-      transition: opacity .2s, transform .1s;
+      border-radius: 12px;
+      padding: .85rem;
+      cursor: pointer;
+      transition: background .15s, transform .15s;
+      font-family: 'Inter', sans-serif;
     }
-    .btn-snap:hover { opacity: .9; transform: translateY(-1px); }
-    .btn-snap:disabled { opacity: .6; transform: none; }
+    .btn-snap:hover { background: var(--violet-dark); }
+    .btn-snap:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* Uploading overlay */
+    .uploading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(16,24,40,.75);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+    .uploading-overlay.active { display: flex; }
+    .upload-spinner {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.2);
+      border-top-color: #fff;
+      animation: spin .85s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .upload-msg { font-size: 1.05rem; font-weight: 700; margin-bottom: .4rem; color: #fff; }
+    .upload-sub { font-size: .82rem; color: rgba(255,255,255,.6); }
+
+    /* Error */
+    .form-error { color: var(--danger); font-size: .78rem; margin-top: .3rem; }
 
     /* Footer */
-    .zs-footer { text-align: center; padding: 1.5rem 1rem; color: rgba(255,255,255,.35); font-size: .78rem; }
-    .zs-footer span { color: var(--zs-gold); }
+    .zs-footer { text-align: center; padding: 1.5rem; color: var(--subtle); font-size: .75rem; }
+    .zs-footer span { color: var(--violet); }
+
+    /* Animate */
+    .fade-up { opacity: 0; transform: translateY(16px); animation: fu .4s ease forwards; }
+    @keyframes fu { to { opacity: 1; transform: translateY(0); } }
+    .d1 { animation-delay: .05s; } .d2 { animation-delay: .12s; }
   </style>
 </head>
 <body>
 
-<div class="zs-header">
-  <div class="zs-brand">📸 ZayroSnap</div>
-  <h2>{{ event.name }}</h2>
-  <div class="sub">{{ event.event_date }}</div>
-  <div class="tagline">Find all your photos from this event — just take a quick selfie!</div>
+<header class="zs-header">
+  <div class="zs-logo-icon"><i class="bi bi-camera"></i></div>
+  <div class="zs-logo-text">Zayro<span>Snap</span></div>
+  <a href="{% url 'guest_landing' event.slug %}" class="zs-back">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</header>
+
+<!-- Step bar -->
+<div class="step-bar fade-up d1" id="stepBar">
+  <div class="sbar-step active" id="s1">
+    <div class="sbar-dot">1</div>
+    <div class="sbar-lbl">Consent</div>
+  </div>
+  <div class="sbar-step" id="s2">
+    <div class="sbar-dot">2</div>
+    <div class="sbar-lbl">Selfie</div>
+  </div>
+  <div class="sbar-step" id="s3">
+    <div class="sbar-dot">3</div>
+    <div class="sbar-lbl">Search</div>
+  </div>
+  <div class="sbar-step" id="s4">
+    <div class="sbar-dot">4</div>
+    <div class="sbar-lbl">Results</div>
+  </div>
 </div>
 
-<div class="container py-4" style="max-width:480px;">
-  <div class="zs-card">
-    <form method="post" enctype="multipart/form-data" id="uploadForm">
-      {% csrf_token %}
+<div class="upload-card">
+  <form method="post" enctype="multipart/form-data" id="uploadForm">
+    {% csrf_token %}
 
-      <div class="upload-zone mb-3" id="uploadZone" onclick="document.getElementById('id_selfie').click()">
-        <img src="" alt="Preview" class="selfie-preview" id="preview">
-        <i class="bi bi-camera-fill display-5" style="color:var(--zs-gold);" id="camIcon"></i>
-        <p class="mt-2 mb-0 small" style="color:rgba(255,255,255,.7);" id="zoneText">Tap to take or choose a selfie</p>
-      </div>
-      <input type="file" name="selfie" id="id_selfie" accept="image/*" capture="user" class="d-none" required onchange="previewSelfie(this)">
-      {% if form.selfie.errors %}<div class="text-danger small mb-2">{{ form.selfie.errors }}</div>{% endif %}
-
-      <div class="mb-3">
-        <input type="text" name="name" class="form-control"
-               placeholder="Your name (optional)" value="{{ form.name.value|default:'' }}">
-      </div>
-      <div class="mb-3">
-        <input type="text" name="phone" class="form-control"
-               placeholder="Phone / WhatsApp (optional)" value="{{ form.phone.value|default:'' }}">
+    <!-- STEP 1: Consent -->
+    <div class="consent-panel fade-up d2" id="consentPanel">
+      <div class="consent-icon"><i class="bi bi-shield-check"></i></div>
+      <div class="consent-title">Your privacy matters</div>
+      <div class="consent-text">
+        Your selfie is used <strong>only</strong> to find your photos from
+        <strong>{{ event.name }}</strong>. It's not stored or shared with anyone.
       </div>
 
-      <div class="consent-box mb-3">
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" name="consent" id="id_consent" required>
-          <label class="form-check-label" for="id_consent">
-            <strong style="color:var(--zs-gold);">Privacy notice:</strong>
-            My selfie will be used <em>only</em> to find my photos from <strong>{{ event.name }}</strong>
-            and will not be shared with third parties.
-          </label>
+      <label class="consent-check" id="consentCheck" onclick="toggleConsent(this)">
+        <input type="checkbox" name="consent" id="id_consent" required>
+        <div class="check-content" style="display:flex;align-items:flex-start;gap:.6rem;width:100%;">
+          <div class="check-box"><i class="bi bi-check-lg"></i></div>
+          <div class="check-label">I understand and agree to the privacy notice above.</div>
         </div>
-        {% if form.consent.errors %}<div class="text-danger small mt-1">{{ form.consent.errors }}</div>{% endif %}
+      </label>
+      {% if form.consent.errors %}<div class="form-error">{{ form.consent.errors }}</div>{% endif %}
+
+      <button type="button" class="btn-snap mt-3" id="consentBtn" onclick="proceedToSelfie()" disabled>
+        Continue <i class="bi bi-arrow-right"></i>
+      </button>
+    </div>
+
+    <!-- STEP 2: Selfie -->
+    <div class="selfie-section fade-up" id="selfieSection">
+
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('id_selfie').click()">
+        <img src="" alt="Preview" class="selfie-preview" id="preview">
+        <div class="zone-icon" id="zoneIcon"><i class="bi bi-camera-fill"></i></div>
+        <div class="zone-text" id="zoneText">Tap to take or choose a selfie</div>
+        <div class="zone-sub">Position your face clearly in the frame</div>
+      </div>
+      <input type="file" name="selfie" id="id_selfie" accept="image/*" capture="user"
+             class="d-none" required onchange="previewSelfie(this)">
+      {% if form.selfie.errors %}<div class="form-error mb-2">{{ form.selfie.errors }}</div>{% endif %}
+
+      <div class="opt-fields">
+        <div class="opt-label">Optional info</div>
+        <input type="text" name="name" class="zs-input"
+               placeholder="Your name" value="{{ form.name.value|default:'' }}">
+        <input type="text" name="phone" class="zs-input"
+               placeholder="Phone / WhatsApp" value="{{ form.phone.value|default:'' }}">
       </div>
 
-      <button class="btn-snap w-100" type="submit" id="submitBtn">
+      <button type="submit" class="btn-snap" id="submitBtn" disabled>
         <i class="bi bi-search-heart"></i> Find My Photos
       </button>
-    </form>
-  </div>
+    </div>
+
+  </form>
 </div>
 
 <div class="zs-footer">© 2026 <span>ZayroSnap</span> — Powered by Zayron Infotech</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Uploading overlay -->
+<div class="uploading-overlay" id="uploadingOverlay">
+  <div class="upload-spinner"></div>
+  <div class="upload-msg">Uploading your selfie…</div>
+  <div class="upload-sub">Please wait, do not close this page</div>
+</div>
+
 <script>
+function toggleConsent(el) {
+  el.classList.toggle('checked');
+  const cb = document.getElementById('id_consent');
+  cb.checked = !cb.checked;
+  document.getElementById('consentBtn').disabled = !cb.checked;
+}
+
+function proceedToSelfie() {
+  document.getElementById('s1').classList.remove('active');
+  document.getElementById('s1').classList.add('done');
+  document.getElementById('s1').querySelector('.sbar-dot').innerHTML = '<i class="bi bi-check-lg" style="font-size:.7rem;"></i>';
+  document.getElementById('s2').classList.add('active');
+
+  document.getElementById('consentPanel').style.display = 'none';
+  const sec = document.getElementById('selfieSection');
+  sec.classList.add('visible');
+  setTimeout(() => sec.classList.add('fade-up'), 10);
+}
+
 function previewSelfie(input) {
   if (input.files && input.files[0]) {
     const reader = new FileReader();
@@ -160,16 +347,23 @@ function previewSelfie(input) {
       const preview = document.getElementById('preview');
       preview.src = e.target.result;
       preview.style.display = 'block';
-      document.getElementById('camIcon').style.display = 'none';
+      document.getElementById('zoneIcon').style.display = 'none';
       document.getElementById('zoneText').textContent = 'Tap to change selfie';
+      document.getElementById('uploadZone').classList.add('has-image');
+      document.getElementById('submitBtn').disabled = false;
     };
     reader.readAsDataURL(input.files[0]);
   }
 }
-document.getElementById('uploadForm').addEventListener('submit', function(){
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Searching…';
+
+document.getElementById('uploadForm').addEventListener('submit', function () {
+  document.getElementById('s2').classList.remove('active');
+  document.getElementById('s2').classList.add('done');
+  document.getElementById('s2').querySelector('.sbar-dot').innerHTML = '<i class="bi bi-check-lg" style="font-size:.7rem;"></i>';
+  document.getElementById('s3').classList.add('active');
+
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('uploadingOverlay').classList.add('active');
 });
 </script>
 </body>

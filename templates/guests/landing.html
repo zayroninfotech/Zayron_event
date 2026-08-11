@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ event.name }} — ZayroSnap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --violet:      #6C5CE7;
+      --violet-dark: #5A4BD1;
+      --violet-lt:   #EDE9FF;
+      --blue:        #3B82F6;
+      --text:        #101828;
+      --muted:       #667085;
+      --subtle:      #98A2B3;
+      --border:      #E7E9F0;
+      --bg:          #F7F8FC;
+      --surface:     #FFFFFF;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--surface);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .zs-header {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .zs-logo-icon {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--violet), var(--blue));
+      display: grid; place-items: center;
+      color: #fff;
+      font-size: .85rem;
+    }
+    .zs-logo-text {
+      font-size: .95rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -.2px;
+    }
+    .zs-logo-text span { color: var(--violet); }
+
+    /* ── Hero ── */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 48px 24px 36px;
+    }
+
+    .event-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--violet-lt);
+      color: var(--violet);
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      margin-bottom: 20px;
+    }
+
+    .hero-icon {
+      width: 80px; height: 80px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--violet-lt) 0%, #dbeafe 100%);
+      border: 1px solid var(--border);
+      display: grid; place-items: center;
+      font-size: 2rem;
+      color: var(--violet);
+      margin: 0 auto 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -.5px;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      max-width: 500px;
+    }
+
+    .hero-date {
+      font-size: .875rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+
+    .hero-photo-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 6px 16px;
+      font-size: .82rem;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+    .hero-photo-count strong { color: var(--text); }
+
+    .btn-find {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--violet);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 32px;
+      text-decoration: none;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      box-shadow: 0 4px 14px rgba(108,92,231,.3);
+      max-width: 320px;
+      width: 100%;
+      justify-content: center;
+    }
+    .btn-find:hover {
+      background: var(--violet-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(108,92,231,.4);
+      color: #fff;
+    }
+    .btn-find i { font-size: 1.1rem; }
+
+    /* ── How it works ── */
+    .how-section {
+      padding: 36px 24px 40px;
+      max-width: 540px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .how-title {
+      text-align: center;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--subtle);
+      margin-bottom: 24px;
+    }
+    .steps {
+      display: flex;
+      gap: 0;
+      position: relative;
+    }
+    .step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 19px;
+      left: 50%;
+      width: 100%;
+      height: 1.5px;
+      background: var(--border);
+      z-index: 0;
+    }
+    .step-num {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      display: grid; place-items: center;
+      position: relative; z-index: 1;
+      margin-bottom: 10px;
+      transition: border-color .2s, background .2s;
+    }
+    .step-num i {
+      font-size: 1rem;
+      color: var(--subtle);
+    }
+    .step-lbl {
+      font-size: .75rem;
+      color: var(--muted);
+      line-height: 1.4;
+      font-weight: 500;
+    }
+    .step-num-circle {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--violet);
+      color: #fff;
+      font-size: .65rem;
+      font-weight: 700;
+      display: grid; place-items: center;
+      position: absolute;
+      top: -6px; right: -6px;
+      z-index: 2;
+    }
+
+    /* ── Footer ── */
+    .zs-footer {
+      text-align: center;
+      padding: 16px;
+      font-size: .75rem;
+      color: var(--subtle);
+      border-top: 1px solid var(--border);
+    }
+    .zs-footer strong { color: var(--violet); }
+
+    /* ── Animations ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(18px);
+      animation: fadeUp .5s ease forwards;
+    }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+    .d1 { animation-delay: .05s; }
+    .d2 { animation-delay: .15s; }
+    .d3 { animation-delay: .25s; }
+    .d4 { animation-delay: .38s; }
+    .d5 { animation-delay: .52s; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="zs-header">
+  <div class="zs-logo-icon"><i class="bi bi-camera"></i></div>
+  <div class="zs-logo-text">Zayro<span>Snap</span></div>
+</header>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="event-type-badge fade-up d1">
+    <i class="bi bi-camera"></i> Photography Event
+  </div>
+
+  <div class="hero-icon fade-up d2">
+    <i class="bi bi-camera"></i>
+  </div>
+
+  <h1 class="fade-up d2">{{ event.name }}</h1>
+
+  <p class="hero-date fade-up d3">
+    <i class="bi bi-calendar3"></i> {{ event.event_date }}
+  </p>
+
+  <div class="hero-photo-count fade-up d3">
+    <i class="bi bi-images"></i>
+    <strong>{{ event.total_photos }}</strong> photos from this event
+  </div>
+
+  <a href="{% url 'guest_upload' event.slug %}" class="btn-find fade-up d4">
+    <i class="bi bi-search-heart"></i> Find My Photos
+  </a>
+</div>
+
+<!-- How it works -->
+<div class="how-section fade-up d5">
+  <div class="how-title">How it works</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">
+        <i class="bi bi-camera"></i>
+        <span class="step-num-circle">1</span>
+      </div>
+      <div class="step-lbl">Take a<br>selfie</div>
+    </div>
+    <div class="step">
+      <div class="step-num">
+        <i class="bi bi-cpu"></i>
+        <span class="step-num-circle">2</span>
+      </div>
+      <div class="step-lbl">AI<br>searches</div>
+    </div>
+    <div class="step">
+      <div class="step-num">
+        <i class="bi bi-download"></i>
+        <span class="step-num-circle">3</span>
+      </div>
+      <div class="step-lbl">View &amp;<br>download</div>
+    </div>
+  </div>
+</div>
+
+<footer class="zs-footer">
+  Powered by <strong>ZayroSnap</strong>
+</footer>
+
+</body>
+</html>

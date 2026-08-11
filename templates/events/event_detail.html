@@ -1,141 +1,972 @@
 {% extends 'base.html' %}
 {% block title %}{{ event.name }} — ZayroSnap{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Back link ── */
+  .ev-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .82rem;
+    color: var(--zs-muted);
+    text-decoration: none;
+    margin-bottom: 16px;
+    transition: color .15s;
+  }
+  .ev-back:hover { color: var(--zs-violet); }
+
+  /* ── Event header ── */
+  .ev-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .ev-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--zs-text);
+    letter-spacing: -.4px;
+    margin-bottom: 8px;
+  }
+  .ev-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .ev-date-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--zs-bg);
+    border: 1px solid var(--zs-border);
+    border-radius: 99px;
+    padding: 4px 12px;
+    font-size: .78rem;
+    color: var(--zs-muted);
+  }
+  .ev-desc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--zs-violet-lt);
+    border-radius: 99px;
+    padding: 4px 12px;
+    font-size: .78rem;
+    color: var(--zs-violet);
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ev-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 99px;
+    padding: 4px 12px;
+    font-size: .78rem;
+    font-weight: 600;
+  }
+  .ev-status-badge.ready    { background: var(--zs-success-lt); color: var(--zs-success); }
+  .ev-status-badge.indexing { background: var(--zs-warning-lt); color: var(--zs-warning); }
+  .ev-status-badge.empty    { background: var(--zs-bg);         color: var(--zs-muted); border: 1px solid var(--zs-border); }
+
+  .ev-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .btn-ev-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .82rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--zs-border);
+    color: var(--zs-muted);
+    background: var(--zs-surface);
+    text-decoration: none;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .btn-ev-edit:hover {
+    border-color: var(--zs-violet);
+    color: var(--zs-violet);
+    background: var(--zs-violet-lt);
+  }
+  .btn-ev-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .82rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--zs-border);
+    color: var(--zs-muted);
+    background: var(--zs-surface);
+    text-decoration: none;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .btn-ev-delete:hover {
+    border-color: var(--zs-danger);
+    color: var(--zs-danger);
+    background: var(--zs-danger-lt);
+  }
+
+  /* ── Stats strip ── */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 576px) { .stats-strip { grid-template-columns: 1fr; } }
+
+  .stat-tile {
+    background: var(--zs-surface);
+    border: 1px solid var(--zs-border);
+    border-radius: var(--zs-radius);
+    box-shadow: var(--zs-shadow);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .stat-icon {
+    width: 40px; height: 40px; min-width: 40px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 1.1rem;
+  }
+  .stat-icon.blue   { background: var(--zs-blue-lt);    color: var(--zs-blue); }
+  .stat-icon.violet { background: var(--zs-violet-lt);  color: var(--zs-violet); }
+  .stat-icon.green  { background: var(--zs-success-lt); color: var(--zs-success); }
+  .stat-val  { font-size: 1.25rem; font-weight: 800; color: var(--zs-text); line-height: 1; }
+  .stat-lbl  { font-size: .72rem;  color: var(--zs-muted); margin-top: 2px; }
+
+  /* ── Two-column panel ── */
+  .panel-row {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: start;
+  }
+  @media (max-width: 768px) { .panel-row { grid-template-columns: 1fr; } }
+
+  /* QR card */
+  .qr-card {
+    background: var(--zs-surface);
+    border: 1px solid var(--zs-border);
+    border-radius: var(--zs-radius-lg);
+    box-shadow: var(--zs-shadow);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+  .qr-card-title {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--zs-text);
+    margin: 0;
+  }
+  .qr-card-sub {
+    font-size: .75rem;
+    color: var(--zs-muted);
+    margin: -4px 0 0;
+    line-height: 1.5;
+  }
+  .qr-img {
+    width: 180px; height: 180px;
+    border: 1px solid var(--zs-border);
+    border-radius: var(--zs-radius);
+    padding: 6px;
+    background: #fff;
+    object-fit: contain;
+  }
+  .btn-qr-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+    padding: 8px 16px;
+    border: 1px solid var(--zs-border);
+    border-radius: 8px;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--zs-muted);
+    text-decoration: none;
+    background: var(--zs-bg);
+    transition: border-color .15s, color .15s;
+  }
+  .btn-qr-download:hover {
+    border-color: var(--zs-violet);
+    color: var(--zs-violet);
+  }
+  .qr-link-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    background: var(--zs-bg);
+    border: 1px solid var(--zs-border);
+    border-radius: 8px;
+    padding: 6px 10px;
+  }
+  .qr-link-row input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-size: .72rem;
+    color: var(--zs-muted);
+    outline: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .qr-copy-btn {
+    background: none;
+    border: none;
+    color: var(--zs-violet);
+    cursor: pointer;
+    font-size: .85rem;
+    padding: 0 2px;
+    flex-shrink: 0;
+    transition: color .15s;
+  }
+  .qr-copy-btn:hover { color: var(--zs-violet-dark); }
+
+  /* Upload card */
+  .upload-card {
+    background: var(--zs-surface);
+    border: 1px solid var(--zs-border);
+    border-radius: var(--zs-radius-lg);
+    box-shadow: var(--zs-shadow);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .upload-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .upload-card-title {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--zs-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+  }
+  .indexed-badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--zs-blue-lt);
+    color: var(--zs-blue);
+    font-size: .72rem;
+    font-weight: 700;
+    border-radius: 99px;
+    padding: 2px 9px;
+  }
+
+  /* Progress */
+  .proc-wrap {}
+  .proc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .proc-status {
+    font-size: .78rem;
+    color: var(--zs-muted);
+  }
+  .proc-count {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--zs-text);
+  }
+  .proc-bar {
+    height: 6px;
+    border-radius: 99px;
+    background: var(--zs-border);
+    overflow: hidden;
+  }
+  .proc-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--zs-violet), var(--zs-blue));
+    transition: width .4s;
+  }
+
+  /* Drop zone */
+  #dropZone {
+    border: 1.5px dashed #C8CDD8;
+    border-radius: var(--zs-radius);
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--zs-muted);
+    background: var(--zs-bg);
+  }
+  #dropZone:hover,
+  #dropZone.drag-over {
+    border-color: var(--zs-violet);
+    background: var(--zs-violet-lt);
+  }
+  #dropZone .dz-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--zs-violet-lt);
+    color: var(--zs-violet);
+    display: grid; place-items: center;
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+    transition: background .2s;
+  }
+  #dropZone:hover .dz-icon,
+  #dropZone.drag-over .dz-icon {
+    background: rgba(108,92,231,.2);
+  }
+  #dropZone strong {
+    font-size: .875rem;
+    font-weight: 600;
+    color: var(--zs-text);
+  }
+  #dropZone small {
+    font-size: .75rem;
+    color: var(--zs-subtle);
+  }
+
+  /* Upload status */
+  #uploadStatus { display: none; }
+  .upload-status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  /* ── Photo grid ── */
+  .photos-section { }
+  .photos-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .photos-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--zs-text);
+    margin: 0;
+  }
+  .photo-count-badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--zs-bg);
+    border: 1px solid var(--zs-border);
+    color: var(--zs-muted);
+    font-size: .72rem;
+    font-weight: 600;
+    border-radius: 99px;
+    padding: 2px 9px;
+  }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+  }
+
+  .photo-tile {
+    border-radius: var(--zs-radius);
+    overflow: hidden;
+    background: var(--zs-surface);
+    position: relative;
+    transition: transform .18s, box-shadow .18s;
+    cursor: pointer;
+  }
+  .photo-tile:hover {
+    transform: scale(1.02);
+    box-shadow: var(--zs-shadow-md);
+    z-index: 2;
+  }
+
+  .photo-thumb-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--zs-bg);
+  }
+  .photo-thumb-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
+    transition: transform .18s;
+  }
+  .photo-tile:hover .photo-thumb-wrap img { transform: scale(1.04); }
+
+  /* Face badge */
+  .face-badge {
+    position: absolute;
+    top: 6px; left: 6px;
+    border-radius: 99px;
+    font-size: .65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    backdrop-filter: blur(4px);
+    z-index: 3;
+    pointer-events: none;
+  }
+  .face-badge.indexing {
+    background: rgba(245,158,11,.85);
+    color: #fff;
+  }
+  .face-badge.faces {
+    background: rgba(59,130,246,.85);
+    color: #fff;
+  }
+  .face-badge.done {
+    background: rgba(34,197,94,.85);
+    color: #fff;
+  }
+
+  /* Delete overlay */
+  .photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(16,24,40,.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 10px;
+    opacity: 0;
+    transition: opacity .18s;
+    z-index: 4;
+  }
+  .photo-tile:hover .photo-overlay { opacity: 1; }
+  .del-btn {
+    width: 34px; height: 34px;
+    background: var(--zs-danger);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    font-size: .85rem;
+    cursor: pointer;
+    display: grid; place-items: center;
+    transition: background .15s, transform .15s;
+  }
+  .del-btn:hover { background: #dc2626; transform: scale(1.1); }
+
+  /* Empty state */
+  .photos-empty {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--zs-surface);
+    border: 1px solid var(--zs-border);
+    border-radius: var(--zs-radius-lg);
+  }
+  .photos-empty-icon {
+    font-size: 2.5rem;
+    color: var(--zs-border);
+    display: block;
+    margin-bottom: 12px;
+  }
+  .photos-empty h4 {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--zs-text);
+    margin-bottom: 6px;
+  }
+  .photos-empty p {
+    font-size: .82rem;
+    color: var(--zs-muted);
+    margin: 0;
+  }
+
+  /* ── Lightbox ── */
+  #lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.92);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  #lightbox.open { display: flex; }
+  #lightbox img {
+    max-width: 90vw;
+    max-height: 82vh;
+    object-fit: contain;
+    border-radius: var(--zs-radius);
+    user-select: none;
+    pointer-events: none;
+  }
+  .lb-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 1.1rem;
+    display: grid; place-items: center;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .lb-close:hover { background: rgba(255,255,255,.2); }
+  .lb-prev, .lb-next {
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 1.1rem;
+    display: grid; place-items: center;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .lb-prev:hover, .lb-next:hover { background: rgba(255,255,255,.2); }
+  .lb-prev { left: 16px; }
+  .lb-next { right: 16px; }
+  .lb-footer {
+    position: absolute;
+    bottom: 16px;
+    left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-direction: column;
+  }
+  .lb-filename {
+    font-size: .78rem;
+    color: rgba(255,255,255,.5);
+  }
+  .lb-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .8rem;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(108,92,231,.7);
+    border-radius: 99px;
+    padding: 6px 14px;
+    text-decoration: none;
+    transition: background .15s;
+  }
+  .lb-download:hover { background: var(--zs-violet); color: #fff; }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+<!-- Back link -->
+<a href="{% url 'dashboard' %}" class="ev-back">
+  <i class="bi bi-arrow-left"></i> All Events
+</a>
+
+<!-- Event header -->
+<div class="ev-header">
   <div>
-    <h3 class="fw-bold mb-0">{{ event.name }}</h3>
-    <span class="badge px-3 py-1 rounded-pill" style="background:var(--zs-blue-lt); color:var(--zs-blue);">
-      <i class="bi bi-calendar-event"></i> {{ event.event_date }}
-    </span>
-    {% if event.description %}<p class="text-muted small mt-1 mb-0">{{ event.description }}</p>{% endif %}
+    <h1 class="ev-title">{{ event.name }}</h1>
+    <div class="ev-meta">
+      <span class="ev-date-chip">
+        <i class="bi bi-calendar3"></i> {{ event.event_date }}
+      </span>
+      {% if event.description %}
+        <span class="ev-desc-chip">{{ event.description }}</span>
+      {% endif %}
+      {% if event.total_photos == 0 %}
+        <span class="ev-status-badge empty"><i class="bi bi-camera"></i> No Photos</span>
+      {% elif event.processed_photos == event.total_photos %}
+        <span class="ev-status-badge ready"><i class="bi bi-check-circle"></i> Ready</span>
+      {% else %}
+        <span class="ev-status-badge indexing"><i class="bi bi-arrow-clockwise"></i> Processing</span>
+      {% endif %}
+    </div>
   </div>
-  <div class="d-flex gap-2 flex-wrap">
-    <a href="{% url 'event_edit' event.slug %}" class="btn btn-sm btn-outline-dark">
+  <div class="ev-actions">
+    <a href="{% url 'event_edit' event.slug %}" class="btn-ev-edit">
       <i class="bi bi-pencil"></i> Edit
     </a>
-    <a href="{% url 'event_delete' event.slug %}" class="btn btn-sm btn-outline-danger">
+    <a href="{% url 'event_delete' event.slug %}" class="btn-ev-delete">
       <i class="bi bi-trash"></i> Delete
     </a>
   </div>
 </div>
 
-<div class="row g-4 mb-4">
-  <!-- QR Code -->
-  <div class="col-md-4">
-    <div class="card p-3 text-center h-100">
-      <h6 class="fw-bold mb-3" style="color:var(--zs-navy);">
-        <i class="bi bi-qr-code"></i> Guest QR Code
-      </h6>
-      {% if event.qr_code %}
-        <img src="{{ event.qr_code.url }}" alt="QR code" class="img-fluid mb-2 mx-auto"
-             style="max-width:180px; border:3px solid var(--zs-gold); border-radius:8px; padding:6px; background:#fff;">
-        <a href="{{ event.qr_code.url }}" download class="btn btn-gold btn-sm mb-2">
-          <i class="bi bi-download"></i> Download QR
-        </a>
-        <p class="text-muted small mb-2">Share with guests to find their photos</p>
-        <div class="input-group input-group-sm">
-          <input type="text" class="form-control" id="guestUrl"
-                 value="{{ request.scheme }}://{{ request.get_host }}{% url 'guest_upload' event.slug %}" readonly>
-          <button class="btn btn-outline-dark" onclick="navigator.clipboard.writeText(document.getElementById('guestUrl').value)" title="Copy">
-            <i class="bi bi-clipboard"></i>
-          </button>
-        </div>
-      {% else %}
-        <p class="text-muted">Generating QR…</p>
-      {% endif %}
+<!-- Stats strip -->
+<div class="stats-strip">
+  <div class="stat-tile">
+    <div class="stat-icon blue"><i class="bi bi-images"></i></div>
+    <div>
+      <div class="stat-val" id="totalCount">{{ event.total_photos }}</div>
+      <div class="stat-lbl">Total Photos</div>
+    </div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-icon violet"><i class="bi bi-cpu"></i></div>
+    <div>
+      <div class="stat-val" id="processedCount">{{ event.processed_photos }}</div>
+      <div class="stat-lbl">Indexed</div>
+    </div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-icon green"><i class="bi bi-people"></i></div>
+    <div>
+      <div class="stat-val">{{ event.guest_uploads.count }}</div>
+      <div class="stat-lbl">Guest Searches</div>
+    </div>
+  </div>
+</div>
+
+<!-- Two-column panel -->
+<div class="panel-row">
+
+  <!-- QR card -->
+  <div class="qr-card">
+    <h3 class="qr-card-title"><i class="bi bi-qr-code"></i> Share Event</h3>
+    <p class="qr-card-sub">Guests scan this QR to find their photos instantly.</p>
+
+    {% if event.qr_code %}
+      <img src="{{ event.qr_code.url }}" alt="QR Code" class="qr-img">
+      <a href="{{ event.qr_code.url }}" download class="btn-qr-download">
+        <i class="bi bi-download"></i> Download QR
+      </a>
+      <div class="qr-link-row">
+        <input type="text" id="guestUrl" readonly
+               value="{{ request.scheme }}://{{ request.get_host }}{% url 'guest_landing' event.slug %}">
+        <button class="qr-copy-btn" onclick="copyLink()" title="Copy link">
+          <i class="bi bi-clipboard" id="copyIcon"></i>
+        </button>
+      </div>
+    {% else %}
+      <div class="photos-empty-icon"><i class="bi bi-qr-code"></i></div>
+      <p style="font-size:.8rem; color:var(--zs-muted); margin:0;">Generating QR code…</p>
+    {% endif %}
+  </div>
+
+  <!-- Upload card -->
+  <div class="upload-card">
+    <div class="upload-card-header">
+      <h3 class="upload-card-title">
+        <i class="bi bi-images"></i> Photo Library
+        <span class="indexed-badge" id="processedBadge">
+          {{ event.processed_photos }}/{{ event.total_photos }}
+        </span>
+      </h3>
+    </div>
+
+    {% if event.total_photos %}
+    <div class="proc-wrap">
+      <div class="proc-header">
+        <span class="proc-status" id="procStatusText">
+          {% if event.processed_photos == event.total_photos %}
+            All photos indexed
+          {% else %}
+            Indexing faces…
+          {% endif %}
+        </span>
+        <span class="proc-count">{{ event.processed_photos }}/{{ event.total_photos }}</span>
+      </div>
+      <div class="proc-bar">
+        <div class="proc-bar-fill" id="progressFill"
+             style="width: {% widthratio event.processed_photos event.total_photos 100 %}%"></div>
+      </div>
+    </div>
+    {% endif %}
+
+    <label id="dropZone" for="photoInput">
+      <div class="dz-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+      <strong>Drag photos here or click to browse</strong>
+      <small>JPG &middot; PNG &middot; WEBP &middot; Unlimited files</small>
+    </label>
+    <input type="file" id="photoInput" multiple accept="image/*" class="d-none">
+
+    <div id="uploadStatus">
+      <div class="upload-status-header">
+        <span class="small fw-semibold" style="color:var(--zs-text);" id="uploadLabel">Uploading…</span>
+        <span class="small" style="color:var(--zs-muted);" id="uploadCounter">0 / 0</span>
+      </div>
+      <div class="proc-bar">
+        <div class="proc-bar-fill progress-bar-animated" id="uploadFill" style="width:0%;"></div>
+      </div>
+      <div class="small mt-1" style="color:var(--zs-muted);" id="processingLabel"></div>
     </div>
   </div>
 
-  <!-- Upload -->
-  <div class="col-md-8">
-    <div class="card p-3 h-100">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="fw-bold mb-0" style="color:var(--zs-navy);">
-          <i class="bi bi-images"></i> Photos
-          <span class="badge ms-1 px-2" style="background:var(--zs-blue); font-size:.75rem;" id="processedBadge">
-            {{ event.processed_photos }}/{{ event.total_photos }}
-          </span>
-        </h6>
-      </div>
-      {% if event.total_photos %}
-      <div class="progress mb-3">
-        <div class="progress-bar" id="progressFill"
-             style="width: {% widthratio event.processed_photos event.total_photos 100 %}%"></div>
-      </div>
-      {% endif %}
-      <div id="uploadArea">
-        <div class="mb-3">
-          <label class="form-label fw-semibold" style="color:var(--zs-navy);">Upload Photos</label>
-          <input type="file" name="photos" class="form-control" multiple accept="image/*" required>
-          <div class="form-text">Multiple files allowed. Face detection runs in the background.</div>
-        </div>
-        <button class="btn btn-primary fw-semibold px-4" type="submit">
-          <i class="bi bi-cloud-upload"></i> Upload
-        </button>
-        <span id="uploadStatus" class="ms-3 small text-muted"></span>
-        <div class="progress mt-3 d-none" id="chunkProgress">
-          <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
-               id="chunkFill" style="width:0%"></div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- Photo grid -->
-{% if photos %}
-<h5 class="fw-bold mb-3" style="color:var(--zs-navy);">
-  <i class="bi bi-grid-3x3-gap"></i> Uploaded Photos
-</h5>
-<div class="row g-2 photo-grid">
-  {% for photo in photos %}
-  <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-    <div class="position-relative">
-      {% if photo.thumbnail %}
-        <img src="{{ photo.thumbnail.url }}" alt="{{ photo.filename }}" loading="lazy">
-      {% else %}
-        <img src="{{ photo.image.url }}" alt="{{ photo.filename }}" loading="lazy">
-      {% endif %}
-      <span class="badge position-absolute top-0 end-0 m-1"
-            style="background:{% if photo.processed %}var(--zs-blue){% else %}var(--zs-gold){% endif %}; font-size:.7rem;">
-        {% if photo.processed %}{{ photo.face_count }}f{% else %}…{% endif %}
-      </span>
-    </div>
-    <form method="post" action="{% url 'delete_photo' photo.pk %}" class="mt-1"
-          onsubmit="return confirm('Delete this photo?')">
-      {% csrf_token %}
-      <button class="btn btn-sm btn-outline-danger w-100"><i class="bi bi-trash"></i></button>
-    </form>
+<div class="photos-section">
+  {% if photos %}
+  <div class="photos-section-header">
+    <h3 class="photos-section-title">Photo Library</h3>
+    <span class="photo-count-badge">{{ photos|length }}</span>
   </div>
-  {% endfor %}
+  <div class="photo-grid" id="photoGrid">
+    {% for photo in photos %}
+    <div class="photo-tile"
+         data-src="{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.image.url }}{% endif %}"
+         data-full="{{ photo.image.url }}"
+         data-name="{{ photo.filename }}"
+         onclick="openLightbox(this)">
+      <div class="photo-thumb-wrap">
+        {% if photo.thumbnail %}
+          <img src="{{ photo.thumbnail.url }}" alt="{{ photo.filename }}" loading="lazy" draggable="false">
+        {% else %}
+          <img src="{{ photo.image.url }}" alt="{{ photo.filename }}" loading="lazy" draggable="false">
+        {% endif %}
+
+        <span class="face-badge {% if not photo.processed %}indexing{% elif photo.face_count > 0 %}faces{% else %}done{% endif %}">
+          {% if not photo.processed %}
+            <i class="bi bi-arrow-clockwise"></i> Indexing
+          {% elif photo.face_count > 0 %}
+            {{ photo.face_count }} face{% if photo.face_count != 1 %}s{% endif %}
+          {% else %}
+            <i class="bi bi-check"></i>
+          {% endif %}
+        </span>
+
+        <div class="photo-overlay" onclick="event.stopPropagation()">
+          <form method="post" action="{% url 'delete_photo' photo.pk %}"
+                onsubmit="return confirm('Delete this photo?')" style="margin:0;">
+            {% csrf_token %}
+            <button class="del-btn" type="submit" title="Delete photo">
+              <i class="bi bi-trash"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="photos-empty">
+    <i class="bi bi-images photos-empty-icon"></i>
+    <h4>No photos yet</h4>
+    <p>Drag and drop photos into the upload area above to get started.</p>
+  </div>
+  {% endif %}
 </div>
-{% else %}
-<div class="text-center py-5" style="color:var(--zs-muted);">
-  <div style="font-size:3.5rem; opacity:.25;">🖼️</div>
-  <p class="mt-2">No photos yet — upload some above.</p>
+
+<!-- Lightbox -->
+<div id="lightbox" role="dialog" aria-modal="true">
+  <button class="lb-close" onclick="closeLightbox()" title="Close">
+    <i class="bi bi-x-lg"></i>
+  </button>
+  <button class="lb-prev" onclick="lbNav(-1)" title="Previous">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+  <button class="lb-next" onclick="lbNav(1)" title="Next">
+    <i class="bi bi-chevron-right"></i>
+  </button>
+  <img id="lbImg" src="" alt="Photo">
+  <div class="lb-footer">
+    <span class="lb-filename" id="lbName"></span>
+    <a id="lbDownload" href="#" download class="lb-download">
+      <i class="bi bi-download"></i> Download
+    </a>
+  </div>
 </div>
-{% endif %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-(function(){
-  const slug = '{{ event.slug }}';
-  function poll(){
-    fetch(`/photos/${slug}/status/`)
-      .then(r => r.json())
-      .then(data => {
-        const badge = document.getElementById('processedBadge');
-        if(badge) badge.textContent = `${data.processed}/${data.total}`;
-        const fill = document.getElementById('progressFill');
-        if(fill && data.total > 0) fill.style.width = Math.round(data.processed/data.total*100) + '%';
-        if(data.processed < data.total) setTimeout(poll, 5000);
+const SLUG       = '{{ event.slug }}';
+const UPLOAD_URL = '{% url "bulk_upload" event.slug %}';
+const CSRF       = '{{ csrf_token }}';
+const CHUNK_SIZE = 50;
+
+// ── Copy link ──
+function copyLink() {
+  navigator.clipboard.writeText(document.getElementById('guestUrl').value);
+  document.getElementById('copyIcon').className = 'bi bi-check-lg';
+  showToast('Guest link copied!', 'success');
+  setTimeout(() => {
+    document.getElementById('copyIcon').className = 'bi bi-clipboard';
+  }, 2000);
+}
+
+// ── Drop zone drag styling ──
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', ()  => { dropZone.classList.remove('drag-over'); });
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  if (files.length) startUpload(files);
+});
+
+// ── File picker ──
+document.getElementById('photoInput').addEventListener('change', function () {
+  if (this.files.length) startUpload(Array.from(this.files));
+  this.value = '';
+});
+
+// ── Chunked upload ──
+async function startUpload(files) {
+  const total  = files.length;
+  const chunks = [];
+  for (let i = 0; i < total; i += CHUNK_SIZE) chunks.push(files.slice(i, i + CHUNK_SIZE));
+
+  const statusBox = document.getElementById('uploadStatus');
+  const label     = document.getElementById('uploadLabel');
+  const counter   = document.getElementById('uploadCounter');
+  const fill      = document.getElementById('uploadFill');
+
+  statusBox.style.display = 'block';
+  dropZone.style.pointerEvents = 'none';
+  dropZone.style.opacity = '.45';
+
+  let uploaded = 0;
+  for (let i = 0; i < chunks.length; i++) {
+    label.textContent   = chunks.length > 1 ? `Uploading batch ${i + 1} of ${chunks.length}…` : 'Uploading…';
+    counter.textContent = `${uploaded} / ${total}`;
+    fill.style.width    = Math.round(uploaded / total * 100) + '%';
+
+    const fd = new FormData();
+    chunks[i].forEach(f => fd.append('photos', f));
+    try {
+      const res = await fetch(UPLOAD_URL, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd,
       });
+      if (!res.ok) throw new Error(`Server error on batch ${i + 1}`);
+      uploaded += (await res.json()).uploaded;
+    } catch (err) {
+      label.textContent = `Upload error: ${err.message}`;
+      dropZone.style.pointerEvents = '';
+      dropZone.style.opacity = '';
+      return;
+    }
+
+    counter.textContent = `${uploaded} / ${total}`;
+    fill.style.width    = Math.round(uploaded / total * 100) + '%';
   }
-  {% if event.processed_photos < event.total_photos %}
-  setTimeout(poll, 5000);
-  {% endif %}
-})();
+
+  label.textContent = `${uploaded} photo${uploaded !== 1 ? 's' : ''} uploaded`;
+  fill.style.background = 'var(--zs-success)';
+  dropZone.style.pointerEvents = '';
+  dropZone.style.opacity = '';
+
+  setTimeout(() => location.reload(), 800);
+}
+
+// ── Processing poll ──
+function pollProcessing() {
+  fetch(`/photos/${SLUG}/status/`)
+    .then(r => r.json())
+    .then(data => {
+      const badge = document.getElementById('processedBadge');
+      if (badge) badge.textContent = `${data.processed}/${data.total}`;
+
+      const pCount = document.getElementById('processedCount');
+      if (pCount) pCount.textContent = data.processed;
+
+      const tCount = document.getElementById('totalCount');
+      if (tCount) tCount.textContent = data.total;
+
+      const fill = document.getElementById('progressFill');
+      if (fill && data.total > 0) fill.style.width = Math.round(data.processed / data.total * 100) + '%';
+
+      const txt = document.getElementById('procStatusText');
+      if (txt) txt.textContent = data.processed < data.total
+        ? `Indexing… ${data.processed} of ${data.total} done`
+        : `All ${data.total} photos indexed`;
+
+      if (data.processed < data.total) setTimeout(pollProcessing, 5000);
+    })
+    .catch(() => setTimeout(pollProcessing, 8000));
+}
+
+{% if event.processed_photos < event.total_photos %}
+setTimeout(pollProcessing, 5000);
+{% endif %}
+
+// ── Lightbox ──
+let lbTiles = [];
+let lbIndex = 0;
+
+function buildTileList() {
+  lbTiles = Array.from(document.querySelectorAll('.photo-tile'));
+}
+
+function openLightbox(tile) {
+  buildTileList();
+  lbIndex = lbTiles.indexOf(tile);
+  renderLightbox();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderLightbox() {
+  const tile = lbTiles[lbIndex];
+  if (!tile) return;
+  const fullSrc = tile.dataset.full || tile.dataset.src;
+  const name    = tile.dataset.name || '';
+  document.getElementById('lbImg').src         = fullSrc;
+  document.getElementById('lbName').textContent = name;
+  document.getElementById('lbDownload').href   = fullSrc;
+  document.getElementById('lbDownload').download = name;
+}
+
+function lbNav(dir) {
+  lbIndex = (lbIndex + dir + lbTiles.length) % lbTiles.length;
+  renderLightbox();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'Escape')     closeLightbox();
+  if (e.key === 'ArrowRight') lbNav(1);
+  if (e.key === 'ArrowLeft')  lbNav(-1);
+});
+
+// Click outside image to close
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
 </script>
 {% endblock %}

@@ -31,7 +31,7 @@ class Event(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = slugify(self.name)
+            base_slug = slugify(f"{self.name} {self.event_date}")
             slug = base_slug
             n = 1
             while Event.objects.filter(slug=slug).exclude(pk=self.pk).exists():
@@ -43,7 +43,7 @@ class Event(models.Model):
             self._generate_qr_code()
 
     def _generate_qr_code(self):
-        guest_url = reverse('guest_upload', kwargs={'slug': self.slug})
+        guest_url = reverse('guest_landing', kwargs={'slug': self.slug})
         # Build absolute URL with a placeholder host — organizer can share the QR
         # The QR stores just the path; organizer updates host in production
         full_url = f'http://localhost:8000{guest_url}'

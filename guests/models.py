@@ -16,7 +16,13 @@ class GuestUpload(models.Model):
     task_id = models.CharField(max_length=100, blank=True)
     status = models.CharField(
         max_length=20,
-        choices=[('pending', 'Pending'), ('processing', 'Processing'), ('done', 'Done'), ('failed', 'Failed')],
+        choices=[
+            ('pending', 'Pending'),
+            ('processing', 'Processing'),
+            ('done', 'Done'),
+            ('no_face', 'No Face Detected'),
+            ('failed', 'Failed'),
+        ],
         default='pending',
     )
     created_at = models.DateTimeField(auto_now_add=True)

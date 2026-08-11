@@ -11,6 +11,11 @@ from .tasks import match_guest_faces
 from photos.models import EventPhoto
 
 
+def guest_landing(request, slug):
+    event = get_object_or_404(Event, slug=slug)
+    return render(request, 'guests/landing.html', {'event': event})
+
+
 def guest_upload(request, slug):
     event = get_object_or_404(Event, slug=slug)
     if request.method == 'POST':
@@ -44,11 +49,12 @@ def guest_results(request, slug, upload_id):
 
 
 def guest_status_api(request, upload_id):
-    """Polling endpoint for frontend to check task completion."""
     upload = get_object_or_404(GuestUpload, pk=upload_id)
+    terminal = upload.status in ('done', 'no_face', 'failed')
     return JsonResponse({
         'status': upload.status,
         'match_count': upload.matches.count() if upload.status == 'done' else None,
+        'terminal': terminal,
     })
 
 

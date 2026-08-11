@@ -38,9 +38,9 @@ def match_guest_faces(self, guest_upload_id: int):
         selfie_encodings = face_recognition.face_encodings(selfie_img)
 
         if not selfie_encodings:
-            upload.status = 'done'
+            upload.status = 'no_face'
             upload.save(update_fields=['status'])
-            mongo_store.upsert_guest(guest_upload_id, {'status': 'done', 'face_encoding': []})
+            mongo_store.upsert_guest(guest_upload_id, {'status': 'no_face', 'face_encoding': []})
             return
 
         guest_enc = selfie_encodings[0]

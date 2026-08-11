@@ -4,127 +4,498 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}ZayroSnap{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
+    /* ── Design Tokens ── */
     :root {
-      --zs-navy:   #0b1f4f;
-      --zs-blue:   #1a4db5;
-      --zs-blue-lt:#e8efff;
-      --zs-gold:   #c9a227;
-      --zs-gold-lt:#fff8e1;
-      --zs-white:  #ffffff;
-      --zs-body:   #f0f4ff;
-      --zs-text:   #1a1f36;
-      --zs-muted:  #5a6585;
+      --zs-bg:          #F7F8FC;
+      --zs-surface:     #FFFFFF;
+      --zs-border:      #E7E9F0;
+      --zs-text:        #101828;
+      --zs-muted:       #667085;
+      --zs-subtle:      #98A2B3;
+      --zs-violet:      #6C5CE7;
+      --zs-violet-dark: #5A4BD1;
+      --zs-violet-lt:   #EDE9FF;
+      --zs-blue:        #3B82F6;
+      --zs-blue-lt:     #EFF6FF;
+      --zs-success:     #22C55E;
+      --zs-success-lt:  #DCFCE7;
+      --zs-danger:      #EF4444;
+      --zs-danger-lt:   #FEE2E2;
+      --zs-warning:     #F59E0B;
+      --zs-warning-lt:  #FEF3C7;
+      --zs-radius-sm:   8px;
+      --zs-radius:      12px;
+      --zs-radius-lg:   16px;
+      --zs-shadow:      0 1px 3px rgba(16,24,40,.06), 0 1px 2px rgba(16,24,40,.04);
+      --zs-shadow-md:   0 4px 12px rgba(16,24,40,.08), 0 2px 4px rgba(16,24,40,.04);
     }
 
-    body { background: var(--zs-body); color: var(--zs-text); }
+    /* ── Base ── */
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--zs-bg);
+      color: var(--zs-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+    }
 
     /* ── Navbar ── */
-    .navbar { background: var(--zs-navy) !important; border-bottom: 3px solid var(--zs-gold); }
-    .navbar-brand {
-      font-weight: 800;
-      letter-spacing: -.5px;
-      color: var(--zs-white) !important;
+    .zs-navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+      background: var(--zs-surface);
+      border-bottom: 1px solid var(--zs-border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
     }
-    .navbar-brand span { color: var(--zs-gold); }
-    .nav-link { color: rgba(255,255,255,.85) !important; font-weight: 500; }
-    .nav-link:hover { color: var(--zs-gold) !important; }
-    .navbar .btn-link {
-      color: rgba(255,255,255,.85) !important;
-      font-weight: 500;
+    .zs-navbar .container-fluid {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    /* Brand */
+    .zs-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       text-decoration: none;
+      flex-shrink: 0;
     }
-    .navbar .btn-link:hover { color: var(--zs-gold) !important; }
+    .zs-brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--zs-radius-sm);
+      background: linear-gradient(135deg, var(--zs-violet) 0%, var(--zs-blue) 100%);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 1rem;
+    }
+    .zs-brand-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--zs-text);
+      letter-spacing: -.3px;
+    }
+    .zs-brand-name span { color: var(--zs-violet); }
 
-    /* ── Cards ── */
+    /* Center nav links */
+    .zs-nav-center {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin: 0 auto;
+    }
+    .zs-nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--zs-radius-sm);
+      font-size: .875rem;
+      font-weight: 500;
+      color: var(--zs-muted);
+      text-decoration: none;
+      transition: color .15s, background .15s;
+    }
+    .zs-nav-link:hover,
+    .zs-nav-link.active {
+      color: var(--zs-violet);
+      background: var(--zs-violet-lt);
+    }
+
+    /* Right side */
+    .zs-nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .zs-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--zs-violet) 0%, var(--zs-blue) 100%);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .zs-signout-form { margin: 0; }
+    .zs-signout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border-radius: var(--zs-radius-sm);
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--zs-muted);
+      background: none;
+      border: 1px solid var(--zs-border);
+      cursor: pointer;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .zs-signout-btn:hover {
+      color: var(--zs-danger);
+      border-color: var(--zs-danger);
+      background: var(--zs-danger-lt);
+    }
+
+    /* Mobile hamburger */
+    .zs-toggler {
+      display: none;
+      background: none;
+      border: 1px solid var(--zs-border);
+      border-radius: var(--zs-radius-sm);
+      padding: 5px 8px;
+      cursor: pointer;
+      color: var(--zs-muted);
+      font-size: 1.1rem;
+      margin-left: auto;
+    }
+    .zs-mobile-menu {
+      display: none;
+      flex-direction: column;
+      background: var(--zs-surface);
+      border-top: 1px solid var(--zs-border);
+      padding: 8px 16px 12px;
+      gap: 2px;
+    }
+    .zs-mobile-menu.open { display: flex; }
+    .zs-mobile-menu .zs-nav-link {
+      padding: 10px 12px;
+      border-radius: var(--zs-radius-sm);
+    }
+    .zs-mobile-menu .zs-signout-btn {
+      width: 100%;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .zs-nav-center { display: none; }
+      .zs-nav-right .zs-avatar,
+      .zs-nav-right .zs-signout-btn { display: none; }
+      .zs-toggler { display: flex; align-items: center; }
+    }
+
+    /* ── Main page area ── */
+    .zs-page {
+      flex: 1;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    @media (max-width: 576px) { .zs-page { padding: 20px 16px; } }
+
+    /* ── Bootstrap overrides ── */
+
+    /* Cards */
     .card {
-      border: none;
-      border-top: 3px solid var(--zs-blue);
-      box-shadow: 0 2px 10px rgba(26,77,181,.1);
-      border-radius: 10px;
+      background: var(--zs-surface);
+      border: 1px solid var(--zs-border);
+      border-radius: var(--zs-radius);
+      box-shadow: var(--zs-shadow);
     }
-    .card-footer { border-top: 1px solid var(--zs-blue-lt); }
+    .card-footer {
+      background: transparent;
+      border-top: 1px solid var(--zs-border);
+    }
 
-    /* ── Buttons ── */
-    .btn-primary  { background: var(--zs-blue);  border-color: var(--zs-blue); color: #fff; }
-    .btn-primary:hover { background: #153d96; border-color: #153d96; }
-    .btn-gold     { background: var(--zs-gold);  border-color: var(--zs-gold); color: #fff; font-weight: 600; }
-    .btn-gold:hover { background: #b08a1e; border-color: #b08a1e; color: #fff; }
-    .btn-dark     { background: var(--zs-navy);  border-color: var(--zs-navy); }
-    .btn-dark:hover { background: #0d2a69; }
-    .btn-outline-dark { color: var(--zs-navy); border-color: var(--zs-navy); }
-    .btn-outline-dark:hover { background: var(--zs-navy); color: #fff; }
+    /* Buttons */
+    .btn-primary {
+      background: var(--zs-violet);
+      border-color: var(--zs-violet);
+      color: #fff;
+      font-weight: 600;
+    }
+    .btn-primary:hover, .btn-primary:focus {
+      background: var(--zs-violet-dark);
+      border-color: var(--zs-violet-dark);
+      color: #fff;
+    }
+    .btn-outline-primary {
+      color: var(--zs-violet);
+      border-color: var(--zs-violet);
+    }
+    .btn-outline-primary:hover {
+      background: var(--zs-violet);
+      border-color: var(--zs-violet);
+      color: #fff;
+    }
+    .btn-outline-secondary {
+      color: var(--zs-muted);
+      border-color: var(--zs-border);
+    }
+    .btn-outline-secondary:hover {
+      background: var(--zs-bg);
+      border-color: var(--zs-subtle);
+      color: var(--zs-text);
+    }
 
-    /* ── Photo grid ── */
-    .photo-grid img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; border: 2px solid var(--zs-blue-lt); }
-    .photo-grid img:hover { border-color: var(--zs-gold); }
+    /* Forms */
+    .form-control, .form-select {
+      border-color: var(--zs-border);
+      border-radius: var(--zs-radius-sm);
+      font-size: .9rem;
+      color: var(--zs-text);
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--zs-violet);
+      box-shadow: 0 0 0 3px rgba(108,92,231,.12);
+    }
+    .form-label {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--zs-text);
+      margin-bottom: 5px;
+    }
 
-    /* ── Progress / badges ── */
-    .progress { background: var(--zs-blue-lt); height: 6px; border-radius: 3px; }
-    .progress-bar { background: var(--zs-gold) !important; }
-    .badge-pending { background: var(--zs-gold); color: #fff; }
-    .badge-done    { background: var(--zs-blue); color: #fff; }
+    /* Progress */
+    .progress {
+      background: var(--zs-border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      background: linear-gradient(90deg, var(--zs-violet) 0%, var(--zs-blue) 100%) !important;
+    }
 
-    /* ── Section titles ── */
-    h3, h4, h5 { color: var(--zs-navy); }
+    /* Badges */
+    .badge.bg-primary { background: var(--zs-violet) !important; }
+
+    /* Text */
     .text-muted { color: var(--zs-muted) !important; }
+    h1, h2, h3, h4, h5, h6 { color: var(--zs-text); }
 
-    /* ── Alert overrides ── */
-    .alert-success { background: #e6f4ea; border-color: #27ae60; color: #145a32; }
-    .alert-warning { background: var(--zs-gold-lt); border-color: var(--zs-gold); color: #7d5900; }
-    .alert-danger  { background: #fdecea; border-color: #c0392b; color: #6b1a14; }
-    .alert-info    { background: var(--zs-blue-lt); border-color: var(--zs-blue); color: #0b2a6e; }
+    /* Alert overrides */
+    .alert-success { background: var(--zs-success-lt); border-color: var(--zs-success); color: #166534; }
+    .alert-danger  { background: var(--zs-danger-lt);  border-color: var(--zs-danger);  color: #991b1b; }
+    .alert-warning { background: var(--zs-warning-lt); border-color: var(--zs-warning); color: #92400e; }
+    .alert-info    { background: var(--zs-blue-lt);    border-color: var(--zs-blue);    color: #1e40af; }
+
+    /* ── Toast system ── */
+    #zs-toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .zs-toast {
+      min-width: 280px;
+      max-width: 380px;
+      background: var(--zs-surface);
+      border: 1px solid var(--zs-border);
+      border-radius: var(--zs-radius);
+      box-shadow: var(--zs-shadow-md);
+      padding: 12px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      pointer-events: auto;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity .25s, transform .25s;
+    }
+    .zs-toast.show { opacity: 1; transform: translateY(0); }
+    .zs-toast.hide { opacity: 0; transform: translateY(8px); }
+    .zs-toast-icon {
+      width: 28px; height: 28px; min-width: 28px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: .85rem;
+    }
+    .zs-toast-icon.success { background: var(--zs-success-lt); color: var(--zs-success); }
+    .zs-toast-icon.danger  { background: var(--zs-danger-lt);  color: var(--zs-danger); }
+    .zs-toast-icon.warning { background: var(--zs-warning-lt); color: var(--zs-warning); }
+    .zs-toast-icon.info    { background: var(--zs-blue-lt);    color: var(--zs-blue); }
+    .zs-toast-body { flex: 1; font-size: .875rem; color: var(--zs-text); line-height: 1.45; }
+    .zs-toast-close {
+      background: none; border: none; padding: 0;
+      color: var(--zs-subtle); cursor: pointer; font-size: .9rem; line-height: 1;
+    }
+    .zs-toast-close:hover { color: var(--zs-muted); }
+
+    /* ── Footer ── */
+    .zs-footer {
+      border-top: 1px solid var(--zs-border);
+      padding: 16px 24px;
+      text-align: center;
+      font-size: .8rem;
+      color: var(--zs-subtle);
+    }
+    .zs-footer a { color: var(--zs-violet); text-decoration: none; }
+    .zs-footer a:hover { text-decoration: underline; }
   </style>
   {% block extra_css %}{% endblock %}
 </head>
 <body>
-<nav class="navbar navbar-expand-lg mb-4">
-  <div class="container">
-    <a class="navbar-brand" href="{% url 'dashboard' %}">📸 Zayro<span>Snap</span></a>
-    <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="nav">
-      <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
-        {% if user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'event_create' %}"><i class="bi bi-plus-circle"></i> New Event</a></li>
-          <li class="nav-item">
-            <form method="post" action="{% url 'logout' %}" class="d-inline">
-              {% csrf_token %}
-              <button type="submit" class="nav-link btn btn-link p-0 border-0">
-                <i class="bi bi-box-arrow-right"></i> Logout ({{ user.username }})
-              </button>
-            </form>
-          </li>
-        {% else %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="bi bi-person"></i> Login</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'register' %}"><i class="bi bi-person-plus"></i> Register</a></li>
-        {% endif %}
-      </ul>
+
+<!-- ── Sticky Navbar ── -->
+<nav class="zs-navbar">
+  <div class="container-fluid">
+    <a class="zs-brand" href="{% url 'dashboard' %}">
+      <div class="zs-brand-icon"><i class="bi bi-camera"></i></div>
+      <span class="zs-brand-name">Zayro<span>Snap</span></span>
+    </a>
+
+    {% if user.is_authenticated %}
+    <div class="zs-nav-center">
+      <a href="{% url 'dashboard' %}" class="zs-nav-link">
+        <i class="bi bi-grid-1x2"></i> Dashboard
+      </a>
+      <a href="{% url 'event_create' %}" class="zs-nav-link">
+        <i class="bi bi-plus-circle"></i> New Event
+      </a>
     </div>
+
+    <div class="zs-nav-right">
+      <div class="zs-avatar">{{ user.username|slice:":1" }}</div>
+      <form method="post" action="{% url 'logout' %}" class="zs-signout-form">
+        {% csrf_token %}
+        <button type="submit" class="zs-signout-btn">
+          <i class="bi bi-box-arrow-right"></i> Sign Out
+        </button>
+      </form>
+    </div>
+
+    <button class="zs-toggler" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i class="bi bi-list" id="hamburgerIcon"></i>
+    </button>
+    {% else %}
+    <div class="zs-nav-right" style="margin-left:auto;">
+      <a href="{% url 'login' %}" class="zs-nav-link">
+        <i class="bi bi-person"></i> Login
+      </a>
+      <a href="{% url 'register' %}" class="btn btn-primary btn-sm px-3">
+        <i class="bi bi-person-plus"></i> Register
+      </a>
+    </div>
+    {% endif %}
   </div>
 </nav>
 
-<div class="container pb-5">
-  {% for msg in messages %}
-    <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
-      {{ msg }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  {% endfor %}
-  {% block content %}{% endblock %}
+{% if user.is_authenticated %}
+<div class="zs-mobile-menu" id="mobileMenu">
+  <a href="{% url 'dashboard' %}" class="zs-nav-link">
+    <i class="bi bi-grid-1x2"></i> Dashboard
+  </a>
+  <a href="{% url 'event_create' %}" class="zs-nav-link">
+    <i class="bi bi-plus-circle"></i> New Event
+  </a>
+  <form method="post" action="{% url 'logout' %}" class="zs-signout-form">
+    {% csrf_token %}
+    <button type="submit" class="zs-signout-btn">
+      <i class="bi bi-box-arrow-right"></i> Sign Out
+    </button>
+  </form>
 </div>
+{% endif %}
 
-<footer class="py-3 mt-4" style="background:var(--zs-navy); border-top:3px solid var(--zs-gold);">
-  <div class="container text-center" style="color:rgba(255,255,255,.6); font-size:.85rem;">
-    © 2026 <span style="color:var(--zs-gold); font-weight:600;">ZayroSnap</span> — Powered by Zayron Infotech
-  </div>
+<!-- Hidden Django messages (converted to toasts by JS) -->
+{% for msg in messages %}
+<div data-toast-msg="{{ msg }}" data-toast-type="{{ msg.tags|default:'info' }}" style="display:none;"></div>
+{% endfor %}
+
+<main class="zs-page">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="zs-footer">
+  &copy; 2026 <a href="#">ZayroSnap</a> &mdash; Powered by Zayron Infotech
 </footer>
 
+<!-- Toast container -->
+<div id="zs-toast-container"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* ── Mobile menu toggle ── */
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const icon = document.getElementById('hamburgerIcon');
+  if (menu) {
+    menu.classList.toggle('open');
+    if (icon) icon.className = menu.classList.contains('open') ? 'bi bi-x-lg' : 'bi bi-list';
+  }
+}
+
+/* ── Toast system ── */
+const TOAST_ICONS = {
+  success: '<i class="bi bi-check-circle-fill"></i>',
+  danger:  '<i class="bi bi-exclamation-circle-fill"></i>',
+  error:   '<i class="bi bi-exclamation-circle-fill"></i>',
+  warning: '<i class="bi bi-exclamation-triangle-fill"></i>',
+  info:    '<i class="bi bi-info-circle-fill"></i>',
+};
+
+function showToast(message, type) {
+  type = type || 'info';
+  const resolvedType = type === 'error' ? 'danger' : type;
+  const container = document.getElementById('zs-toast-container');
+
+  const toast = document.createElement('div');
+  toast.className = 'zs-toast';
+  toast.innerHTML = `
+    <div class="zs-toast-icon ${resolvedType}">${TOAST_ICONS[type] || TOAST_ICONS.info}</div>
+    <div class="zs-toast-body">${message}</div>
+    <button class="zs-toast-close" onclick="dismissToast(this.parentElement)">
+      <i class="bi bi-x"></i>
+    </button>
+  `;
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('show'));
+  });
+
+  setTimeout(() => dismissToast(toast), 5000);
+}
+
+function dismissToast(toast) {
+  if (!toast || !toast.parentElement) return;
+  toast.classList.add('hide');
+  toast.classList.remove('show');
+  setTimeout(() => toast.remove(), 300);
+}
+
+/* Fire Django messages as toasts on load */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-toast-msg]').forEach(el => {
+    const msg  = el.dataset.toastMsg;
+    const type = el.dataset.toastType || 'info';
+    if (msg) showToast(msg, type);
+  });
+});
+</script>
+
 {% block extra_js %}{% endblock %}
 </body>
 </html>

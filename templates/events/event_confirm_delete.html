@@ -1,18 +1,140 @@
 {% extends 'base.html' %}
 {% block title %}Delete Event — ZayroSnap{% endblock %}
+
+{% block extra_css %}
+<style>
+  .del-wrap {
+    min-height: calc(100vh - 160px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+  .del-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--zs-surface);
+    border: 1px solid var(--zs-border);
+    border-radius: var(--zs-radius-lg);
+    box-shadow: var(--zs-shadow-md);
+    padding: 36px 32px;
+    text-align: center;
+  }
+  .del-icon-wrap {
+    width: 64px; height: 64px;
+    border-radius: 18px;
+    background: var(--zs-danger-lt);
+    display: grid; place-items: center;
+    font-size: 1.75rem;
+    color: var(--zs-danger);
+    margin: 0 auto 20px;
+  }
+  .del-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--zs-text);
+    letter-spacing: -.3px;
+    margin-bottom: 8px;
+  }
+  .del-event-name {
+    font-weight: 700;
+    color: var(--zs-text);
+  }
+  .del-warning {
+    font-size: .875rem;
+    color: var(--zs-muted);
+    line-height: 1.6;
+    margin-bottom: 28px;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .del-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .btn-del-confirm {
+    width: 100%;
+    padding: 11px;
+    background: var(--zs-danger);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: .9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: background .15s;
+  }
+  .btn-del-confirm:hover { background: #dc2626; }
+  .btn-del-keep {
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: 1px solid var(--zs-border);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: .875rem;
+    font-weight: 600;
+    color: var(--zs-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-del-keep:hover {
+    border-color: var(--zs-subtle);
+    color: var(--zs-text);
+  }
+  .del-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .82rem;
+    color: var(--zs-muted);
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: color .15s;
+  }
+  .del-back:hover { color: var(--zs-violet); }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-6">
-    <div class="card p-4 text-center" style="border-top-color:var(--zs-gold);">
-      <div style="font-size:3rem;">⚠️</div>
-      <h4 class="fw-bold mt-2" style="color:var(--zs-navy);">Delete "{{ event.name }}"?</h4>
-      <p class="text-muted">This permanently deletes the event, all uploaded photos, and all guest matches. This cannot be undone.</p>
-      <form method="post" class="d-flex gap-2 justify-content-center mt-3">
-        {% csrf_token %}
-        <button class="btn btn-danger px-4 fw-semibold" type="submit">Yes, Delete</button>
-        <a href="{% url 'event_detail' event.slug %}" class="btn btn-outline-dark px-4">Cancel</a>
-      </form>
+<a href="{% url 'event_detail' event.slug %}" class="del-back">
+  <i class="bi bi-arrow-left"></i> Back to Event
+</a>
+
+<div class="del-wrap">
+  <div class="del-card">
+    <div class="del-icon-wrap">
+      <i class="bi bi-exclamation-triangle"></i>
     </div>
+    <h1 class="del-title">Delete event?</h1>
+    <p class="del-warning">
+      You're about to permanently delete
+      <span class="del-event-name">"{{ event.name }}"</span>.
+      This removes all photos, QR codes, and guest data.
+      <strong>This cannot be undone.</strong>
+    </p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="del-actions">
+        <button type="submit" class="btn-del-confirm">
+          <i class="bi bi-trash"></i> Delete Event
+        </button>
+        <a href="{% url 'event_detail' event.slug %}" class="btn-del-keep">
+          <i class="bi bi-arrow-left"></i> Keep Event
+        </a>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}

@@ -1,29 +1,145 @@
 {% extends 'base.html' %}
-{% block title %}Register — ZayroSnap{% endblock %}
+{% block title %}Create Account — ZayroSnap{% endblock %}
+
+{% block extra_css %}
+<style>
+  .reg-wrap {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+  .reg-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--zs-surface);
+    border: 1px solid var(--zs-border);
+    border-radius: var(--zs-radius-lg);
+    box-shadow: var(--zs-shadow-md);
+    padding: 36px 32px;
+  }
+  .reg-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .reg-brand-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--zs-violet) 0%, var(--zs-blue) 100%);
+    display: grid; place-items: center;
+    color: #fff;
+    font-size: 1.4rem;
+    margin: 0 auto 14px;
+  }
+  .reg-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--zs-text);
+    letter-spacing: -.3px;
+    margin-bottom: 4px;
+  }
+  .reg-sub {
+    font-size: .85rem;
+    color: var(--zs-muted);
+  }
+
+  /* Field overrides inside card */
+  .reg-card .form-label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--zs-text);
+    margin-bottom: 5px;
+  }
+  .reg-card .form-control {
+    padding: 10px 12px;
+    font-size: .9rem;
+    border-color: var(--zs-border);
+    border-radius: 8px;
+    background: var(--zs-bg);
+    color: var(--zs-text);
+  }
+  .reg-card .form-control:focus {
+    border-color: var(--zs-violet);
+    box-shadow: 0 0 0 3px rgba(108,92,231,.12);
+    background: var(--zs-surface);
+  }
+  .reg-card .form-text {
+    font-size: .76rem;
+    color: var(--zs-subtle);
+  }
+  .reg-card .text-danger {
+    font-size: .78rem;
+  }
+  .reg-card .mb-3 { margin-bottom: 16px !important; }
+
+  .btn-register {
+    width: 100%;
+    padding: 11px;
+    background: var(--zs-violet);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: .95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+    margin-top: 8px;
+  }
+  .btn-register:hover { background: var(--zs-violet-dark); }
+
+  .reg-divider {
+    border: none;
+    border-top: 1px solid var(--zs-border);
+    margin: 20px 0;
+  }
+  .reg-signin {
+    text-align: center;
+    font-size: .85rem;
+    color: var(--zs-muted);
+  }
+  .reg-signin a {
+    color: var(--zs-violet);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .reg-signin a:hover { text-decoration: underline; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-sm-10 col-md-6 col-lg-4">
-    <div class="card p-4">
-      <div class="text-center mb-4">
-        <div style="font-size:2.5rem;">📸</div>
-        <h4 class="fw-bold mb-0" style="color:var(--zs-navy);">ZayroSnap</h4>
-        <p class="text-muted small mb-0">Create Organizer Account</p>
-      </div>
-      <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-          <div class="mb-3">
-            <label class="form-label fw-semibold" style="color:var(--zs-navy);">{{ field.label }}</label>
-            {{ field }}
-            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
-            {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors }}</div>{% endif %}
-          </div>
-        {% endfor %}
-        <button class="btn btn-primary w-100 fw-semibold py-2" type="submit">Create Account</button>
-      </form>
-      <hr style="border-color:var(--zs-blue-lt);">
-      <p class="text-center small mb-0">Have an account? <a href="{% url 'login' %}" style="color:var(--zs-gold); font-weight:600;">Login</a></p>
+<div class="reg-wrap">
+  <div class="reg-card">
+    <div class="reg-header">
+      <div class="reg-brand-icon"><i class="bi bi-camera"></i></div>
+      <h1 class="reg-title">Create your account</h1>
+      <p class="reg-sub">Set up your organizer account in seconds</p>
     </div>
+
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+            <div class="form-text">{{ field.help_text }}</div>
+          {% endif %}
+          {% if field.errors %}
+            <div class="text-danger small mt-1">{{ field.errors }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn-register">
+        <i class="bi bi-person-check"></i> Create Account
+      </button>
+    </form>
+
+    <hr class="reg-divider">
+    <p class="reg-signin">
+      Already have an account? <a href="{% url 'login' %}">Sign in</a>
+    </p>
   </div>
 </div>
 {% endblock %}
