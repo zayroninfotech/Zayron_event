@@ -588,15 +588,22 @@
 {% block extra_js %}
 <script>
 // ── Event card navigation ──
+function goToEvent(href) {
+  if (window.zsRunLoaderThen) {
+    zsRunLoaderThen(() => { window.location.href = href; });
+  } else {
+    window.location.href = href;
+  }
+}
 function handleCardClick(evt, card) {
   if (evt.target.closest('.event-card-footer')) return;
-  window.location.href = card.dataset.href;
+  goToEvent(card.dataset.href);
 }
 document.querySelectorAll('.event-card').forEach(card => {
   card.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      window.location.href = card.dataset.href;
+      goToEvent(card.dataset.href);
     }
   });
 });

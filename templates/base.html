@@ -349,6 +349,85 @@
       display: grid; place-items: center;
       font-size: .85rem;
     }
+    /* ── Universal loader (Zayron aperture camera) ── */
+    #zs-universal-loader {
+      --zsl-accent: #E8A23D;
+      --zsl-paper:  #fff;
+      position: fixed;
+      inset: 0;
+      z-index: 20000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(247,248,252,.88);
+      backdrop-filter: blur(3px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .25s ease;
+    }
+    #zs-universal-loader.active { opacity: 1; visibility: visible; }
+    #zs-universal-loader * { box-sizing: border-box; }
+    #zs-universal-loader .zsl-text {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--zs-muted);
+      margin-top: 28px;
+    }
+    #zs-universal-loader .loader { width:260px;height:230px;position:relative;display:grid;place-items:center;isolation:isolate; }
+    #zs-universal-loader .camera { width:178px;height:124px;position:relative;transform-style:preserve-3d }
+    #zs-universal-loader .body { position:absolute;inset:8px 0 0;border-radius:17px;background:linear-gradient(160deg,#303029 0%,#1b1b17 58%,#11110f 100%);box-shadow:0 18px 38px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.09);z-index:3 }
+    #zs-universal-loader .body:after { content:"";position:absolute;left:18px;right:18px;bottom:13px;height:1px;background:rgba(255,255,255,.07) }
+    #zs-universal-loader .hump { position:absolute;top:0;left:24px;width:55px;height:22px;border-radius:8px 8px 0 0;background:linear-gradient(160deg,#303029,#191915);z-index:2 }
+    #zs-universal-loader .finder { position:absolute;top:4px;left:41px;width:20px;height:10px;border-radius:2px;background:#0b0b09;border:1px solid #3b3b34;z-index:4 }
+    #zs-universal-loader .flashbulb { position:absolute;top:21px;right:17px;width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff8df,#d7a94f 65%,#8f6b2f);box-shadow:0 0 12px rgba(232,162,61,.15);z-index:4 }
+    #zs-universal-loader .lens { position:absolute;left:50%;top:31px;width:75px;height:75px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle at 34% 27%,#515149,#10100e 67%);border:5px solid #0a0a08;box-shadow:0 8px 18px rgba(0,0,0,.32),inset 0 0 0 2px #3b3b34;z-index:5 }
+    #zs-universal-loader .iris { position:absolute;inset:13px;border-radius:50%;overflow:hidden;background:radial-gradient(circle,#161610 0 18%,#070706 19% 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.05) }
+    #zs-universal-loader .blade { position:absolute;inset:-1px;background:linear-gradient(145deg,#f1b45a 0%,var(--zsl-accent) 55%,#b96f20 100%);opacity:.98;transform-origin:50% 50%;clip-path:polygon(50% 50%,100% 3%,100% 38%,58% 56%);filter:drop-shadow(0 1px 1px rgba(0,0,0,.28)) }
+    #zs-universal-loader .b1{--r:0deg;transform:rotate(0deg)}
+    #zs-universal-loader .b2{--r:60deg;transform:rotate(60deg)}
+    #zs-universal-loader .b3{--r:120deg;transform:rotate(120deg)}
+    #zs-universal-loader .b4{--r:180deg;transform:rotate(180deg)}
+    #zs-universal-loader .b5{--r:240deg;transform:rotate(240deg)}
+    #zs-universal-loader .b6{--r:300deg;transform:rotate(300deg)}
+    #zs-universal-loader .glass { position:absolute;inset:15px;border-radius:50%;border:1px solid rgba(255,255,255,.08);z-index:2 }
+    #zs-universal-loader .ring { position:absolute;inset:-8px;border-radius:50%;border:2px solid transparent;border-top-color:var(--zsl-accent);border-right-color:rgba(232,162,61,.18);opacity:0;z-index:3 }
+    #zs-universal-loader .flash { position:absolute;inset:0;border-radius:50%;background:#fff;opacity:0;z-index:9 }
+    #zs-universal-loader .slot { position:absolute;left:27px;bottom:0;width:124px;height:7px;border-radius:0 0 6px 6px;background:#090907;z-index:8 }
+    #zs-universal-loader .print { position:absolute;top:-3px;left:50%;width:96px;height:112px;padding:7px 7px 19px;background:var(--zsl-paper);border-radius:3px;box-shadow:0 14px 26px rgba(0,0,0,.2);transform:translate(-50%,-8px) rotate(0);opacity:0;z-index:1;transform-origin:top center }
+    #zs-universal-loader .photo { width:100%;height:100%;border-radius:2px;background:linear-gradient(135deg,#f0c06a,#c76b43 48%,#35684a);position:relative;overflow:hidden }
+    #zs-universal-loader .photo:after { content:"";position:absolute;inset:0;background:radial-gradient(circle at 70% 24%,rgba(255,255,255,.42),transparent 28%),linear-gradient(140deg,transparent 42%,rgba(255,255,255,.13) 43%,transparent 44%) }
+    #zs-universal-loader .caption { position:absolute;left:7px;right:7px;bottom:5px;height:5px;border-radius:2px;background:#c9c9c3;opacity:.8 }
+    #zs-universal-loader .status { position:absolute;left:0;right:0;bottom:-34px;height:10px;display:flex;justify-content:center;align-items:center;gap:7px;opacity:0 }
+    #zs-universal-loader .status-dot { width:5px;height:5px;border-radius:50%;background:var(--zsl-accent);box-shadow:0 0 10px rgba(232,162,61,.45) }
+    #zs-universal-loader .status-line { width:44px;height:2px;border-radius:2px;background:rgba(232,162,61,.45);overflow:hidden }
+    #zs-universal-loader .status-line:after { content:"";display:block;width:35%;height:100%;background:var(--zsl-accent);transform:translateX(-100%) }
+
+    #zs-universal-loader .camera.run .body { animation: zsl-click .18s ease .08s both }
+    #zs-universal-loader .camera.run .flash { animation: zsl-flash .34s ease-out .1s both }
+    #zs-universal-loader .camera.run .blade { animation: zsl-irisClose 1.65s cubic-bezier(.55,.05,.25,1) .42s 2 both }
+    #zs-universal-loader .camera.run .ring { animation: zsl-ring 1.65s linear .42s 2 both }
+    #zs-universal-loader .camera.run .status { animation: zsl-status 1.8s ease .45s both }
+    #zs-universal-loader .camera.run .status-line:after { animation: zsl-scan 1.5s ease .55s infinite }
+    #zs-universal-loader .camera.run .print { animation: zsl-eject 1.05s cubic-bezier(.18,.85,.25,1.05) 3.15s both }
+    #zs-universal-loader .camera.run { animation: zsl-cycle 4.7s linear both }
+
+    @keyframes zsl-click{0%{transform:scale(1)}35%{transform:scale(.982) translateY(1px)}100%{transform:scale(1)}}
+    @keyframes zsl-flash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+    @keyframes zsl-irisClose{0%{transform:rotate(var(--r,0deg)) scale(1)}12%{transform:rotate(calc(var(--r,0deg) + 8deg)) scale(.92)}32%{transform:rotate(calc(var(--r,0deg) + 24deg)) scale(.66)}48%{transform:rotate(calc(var(--r,0deg) + 34deg)) scale(.47)}56%{transform:rotate(calc(var(--r,0deg) + 36deg)) scale(.40)}64%{transform:rotate(calc(var(--r,0deg) + 31deg)) scale(.47)}84%{transform:rotate(calc(var(--r,0deg) + 10deg)) scale(.82)}100%{transform:rotate(var(--r,0deg)) scale(1)}}
+    @keyframes zsl-ring{0%{opacity:0;transform:rotate(0)}8%{opacity:1}92%{opacity:1}100%{opacity:0;transform:rotate(720deg)}}
+    @keyframes zsl-status{0%{opacity:0;transform:translateY(4px)}12%,82%{opacity:1;transform:translateY(0)}100%{opacity:0}}
+    @keyframes zsl-scan{0%{transform:translateX(-100%)}100%{transform:translateX(360%)}}
+    @keyframes zsl-eject{0%{opacity:0;transform:translate(-50%,-8px) rotate(0)}10%{opacity:1}68%{transform:translate(-50%,112px) rotate(-3deg)}100%{opacity:1;transform:translate(-50%,104px) rotate(-4deg)}}
+    @keyframes zsl-cycle{0%,100%{opacity:1}}
+
+    @media (prefers-reduced-motion:reduce){
+      #zs-universal-loader .camera.run * { animation:none!important }
+      #zs-universal-loader .camera.run .status { opacity:1 }
+      #zs-universal-loader .camera.run .print { opacity:1;transform:translate(-50%,72px) rotate(-4deg) }
+    }
+
     .zs-toast-icon.success { background: var(--zs-success-lt); color: var(--zs-success); }
     .zs-toast-icon.danger  { background: var(--zs-danger-lt);  color: var(--zs-danger); }
     .zs-toast-icon.warning { background: var(--zs-warning-lt); color: var(--zs-warning); }
@@ -374,6 +453,29 @@
   {% block extra_css %}{% endblock %}
 </head>
 <body>
+
+<div id="zs-universal-loader" aria-live="polite" aria-label="Loading">
+  <div class="loader">
+    <div class="camera run" id="zslCamera">
+      <div class="hump"></div>
+      <div class="body">
+        <div class="finder"></div>
+        <div class="flashbulb"></div>
+        <div class="lens">
+          <div class="iris"><i class="blade b1"></i><i class="blade b2"></i><i class="blade b3"></i><i class="blade b4"></i><i class="blade b5"></i><i class="blade b6"></i></div>
+          <div class="glass"></div>
+          <div class="flash"></div>
+          <div class="ring"></div>
+        </div>
+      </div>
+      <div class="slot">
+        <div class="print"><div class="photo"></div><div class="caption"></div></div>
+      </div>
+      <div class="status" aria-hidden="true"><span class="status-dot"></span><span class="status-line"></span></div>
+    </div>
+  </div>
+  <div class="zsl-text" id="zslText">Loading&hellip;</div>
+</div>
 
 <!-- ── Sticky Navbar ── -->
 <nav class="zs-navbar">
@@ -514,6 +616,76 @@ document.addEventListener('DOMContentLoaded', () => {
     const type = el.dataset.toastType || 'info';
     if (msg) showToast(msg, type);
   });
+});
+
+/* ── Universal loader (Zayron aperture camera) ── */
+const zslOverlay = document.getElementById('zs-universal-loader');
+const zslCamera  = document.getElementById('zslCamera');
+const zslText    = document.getElementById('zslText');
+let zslSafetyTimer = null;
+
+function zsShowLoader(text) {
+  clearTimeout(zslSafetyTimer);
+  zslText.textContent = text || 'Loading…';
+  zslOverlay.classList.add('active');
+  // Restart the camera animation cycle each time it's shown
+  zslCamera.classList.remove('run');
+  void zslCamera.offsetWidth;
+  zslCamera.classList.add('run');
+  // Safety net: never let the overlay get stuck forever
+  zslSafetyTimer = setTimeout(zsHideLoader, 15000);
+}
+
+function zsHideLoader() {
+  clearTimeout(zslSafetyTimer);
+  zslOverlay.classList.remove('active');
+}
+
+// Shows the loader, waits for one full camera cycle to finish playing,
+// then runs the callback (navigation / form submit).
+function zsRunLoaderThen(callback, text) {
+  zsShowLoader(text);
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    zslCamera.removeEventListener('animationend', onEnd);
+    clearTimeout(fallback);
+    callback();
+  };
+  const onEnd = ev => {
+    if (ev.target !== zslCamera || ev.animationName !== 'zsl-cycle') return;
+    finish();
+  };
+  zslCamera.addEventListener('animationend', onEnd);
+  // Fallback in case the animation event doesn't fire for any reason
+  const fallback = setTimeout(finish, 5000);
+}
+
+window.addEventListener('pageshow', zsHideLoader);
+
+document.addEventListener('click', e => {
+  if (e.defaultPrevented) return;
+  const link = e.target.closest('a[href]');
+  if (!link) return;
+  if (link.target === '_blank' || link.hasAttribute('download')) return;
+  if (link.dataset.noLoadbar) return;
+  const href = link.getAttribute('href');
+  if (!href || href.startsWith('#') || href.startsWith('javascript:') ||
+      href.startsWith('mailto:') || href.startsWith('tel:')) return;
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+  e.preventDefault();
+  zsRunLoaderThen(() => { window.location.href = href; });
+});
+
+document.addEventListener('submit', e => {
+  if (e.defaultPrevented) return;
+  const form = e.target;
+  if (form.dataset.noLoadbar) return;
+
+  e.preventDefault();
+  zsRunLoaderThen(() => { form.submit(); });
 });
 </script>
 

@@ -297,6 +297,13 @@
     flex-shrink: 0;
   }
   .btn-download-all:hover { background: var(--zs-violet); color: #fff; }
+  .btn-download-all.loading { pointer-events: none; opacity: .75; }
+  .btn-download-all .btn-dl-icon .spin { animation: dlspin .7s linear infinite; }
+
+  .dl-btn.loading, .del-btn.loading { pointer-events: none; }
+  .dl-btn.loading i, .del-btn.loading i { animation: dlspin .7s linear infinite; }
+
+  @keyframes dlspin { to { transform: rotate(360deg); } }
 
   /* Progress */
   .proc-wrap {}
@@ -706,8 +713,10 @@
         </span>
       </h3>
       {% if event.total_photos %}
-      <a href="{% url 'download_all_photos' event.slug %}" class="btn-download-all">
-        <i class="bi bi-file-zip"></i> Download All
+      <a href="{% url 'download_all_photos' event.slug %}" class="btn-download-all"
+         id="downloadAllBtn" data-no-loadbar="true" onclick="return downloadAllPhotos(event)">
+        <span class="btn-dl-icon"><i class="bi bi-file-zip"></i></span>
+        <span class="btn-dl-label">Download All</span>
       </a>
       {% endif %}
     </div>
@@ -784,7 +793,8 @@
         </span>
 
         <div class="photo-overlay" onclick="event.stopPropagation()">
-          <a href="{% url 'download_event_photo' photo.pk %}" class="dl-btn" title="Download photo">
+          <a href="{% url 'download_event_photo' photo.pk %}" class="dl-btn" title="Download photo"
+             data-no-loadbar="true" onclick="return downloadSinglePhoto(event, this)">
             <i class="bi bi-download"></i>
           </a>
           <form method="post" action="{% url 'delete_photo' photo.pk %}"
@@ -837,6 +847,76 @@ const SLUG       = '{{ event.slug }}';
 const UPLOAD_URL = '{% url "bulk_upload" event.slug %}';
 const CSRF       = '{{ csrf_token }}';
 const CHUNK_SIZE = 50;
+
+// ── Download with spinner (fetch → blob → save) ──
+function extractFilename(res, fallback) {
+  const cd = res.headers.get('Content-Disposition') || '';
+  const match = cd.match(/filename="?([^"]+)"?/);
+  return match ? match[1] : fallback;
+}
+
+async function downloadWithSpinner(url, fallbackName) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Download failed');
+  const blob = await res.blob();
+  const filename = extractFilename(res, fallbackName);
+  const blobUrl = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => window.URL.revokeObjectURL(blobUrl), 4000);
+}
+
+function downloadAllPhotos(evt) {
+  evt.preventDefault();
+  const btn = document.getElementById('downloadAllBtn');
+  const icon = btn.querySelector('.btn-dl-icon');
+  const label = btn.querySelector('.btn-dl-label');
+
+  btn.classList.add('loading');
+  icon.innerHTML = '<i class="bi bi-arrow-repeat spin"></i>';
+  label.textContent = 'Preparing zip…';
+  if (window.zsShowLoader) zsShowLoader('Zipping your photos…');
+
+  downloadWithSpinner(btn.href, `${SLUG}_photos.zip`)
+    .then(() => {
+      label.textContent = 'Downloaded';
+      icon.innerHTML = '<i class="bi bi-check-lg"></i>';
+      showToast('Photos downloaded', 'success');
+    })
+    .catch(() => {
+      label.textContent = 'Failed';
+      icon.innerHTML = '<i class="bi bi-exclamation-triangle"></i>';
+      showToast('Unable to download photos', 'error');
+    })
+    .finally(() => {
+      if (window.zsHideLoader) zsHideLoader();
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        icon.innerHTML = '<i class="bi bi-file-zip"></i>';
+        label.textContent = 'Download All';
+      }, 1600);
+    });
+
+  return false;
+}
+
+function downloadSinglePhoto(evt, link) {
+  evt.preventDefault();
+  evt.stopPropagation();
+  link.classList.add('loading');
+
+  downloadWithSpinner(link.href, 'photo.jpg')
+    .catch(() => showToast('Unable to download photo', 'error'))
+    .finally(() => {
+      setTimeout(() => link.classList.remove('loading'), 500);
+    });
+
+  return false;
+}
 
 // ── Copy link ──
 function copyLink() {
