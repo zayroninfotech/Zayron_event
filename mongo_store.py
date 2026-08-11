@@ -14,11 +14,12 @@ Collections:
 
 from functools import lru_cache
 from django.conf import settings
-import pymongo
+from pymongo import MongoClient
+from pymongo.database import Database
 
 
 @lru_cache(maxsize=1)
-def _client() -> pymongo.MongoClient:
+def _client() -> MongoClient:
     host = settings.MONGO_HOST
     port = settings.MONGO_PORT
     user = settings.MONGO_USER
@@ -31,10 +32,10 @@ def _client() -> pymongo.MongoClient:
             username=user, password=password,
             authSource=auth_source,
         )
-    return pymongo.MongoClient(host=host, port=port)
+    return MongoClient(host=host, port=port)
 
 
-def db() -> pymongo.database.Database:
+def db() -> Database:
     return _client()[settings.MONGO_DB]
 
 
