@@ -107,6 +107,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DATA_UPLOAD_MAX_NUMBER_FILES = None
+DATA_UPLOAD_MAX_MEMORY_SIZE  = 500 * 1024 * 1024   # 500 MB per request
+FILE_UPLOAD_MAX_MEMORY_SIZE  = 500 * 1024 * 1024   # stream to disk above this
 
 # Celery
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='memory://')
