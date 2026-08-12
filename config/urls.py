@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
-from events.agent_api import agent_login, agent_events, agent_create_event, agent_upload_photo, agent_stats
+from events.agent_api import agent_login, agent_events, agent_create_event, agent_upload_photo, agent_stats, agent_history, agent_toggle_sync
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -18,6 +18,8 @@ urlpatterns = [
     path('api/agent/events/create/', agent_create_event, name='agent_create_event'),
     path('api/agent/upload/<slug:slug>/', agent_upload_photo, name='agent_upload_photo'),
     path('api/agent/stats/', agent_stats, name='agent_stats'),
+    path('api/agent/history/', agent_history, name='agent_history'),
+    path('api/agent/toggle-sync/<slug:slug>/', agent_toggle_sync, name='agent_toggle_sync'),
 ]
 
 if settings.DEBUG:

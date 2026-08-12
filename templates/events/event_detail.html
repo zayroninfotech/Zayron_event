@@ -774,6 +774,40 @@
 
 </div>
 
+<!-- Agent Sync Panel -->
+<div class="stat-tile" style="margin-bottom:20px; flex-wrap:wrap; gap:16px; justify-content:space-between;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="stat-icon violet"><i class="bi bi-laptop"></i></div>
+    <div>
+      <div style="font-size:.9rem;font-weight:700;color:var(--zs-text);">Agent Auto Sync</div>
+      <div style="font-size:.75rem;color:var(--zs-muted);">
+        {% if event.watch_folder %}📁 {{ event.watch_folder }}{% else %}No folder set — edit event to add one{% endif %}
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="syncStatusText" style="font-size:.8rem;font-weight:600;color:{% if event.agent_sync_enabled %}var(--zs-success){% else %}var(--zs-muted){% endif %}">
+      {% if event.agent_sync_enabled %}● Sync ON{% else %}○ Sync OFF{% endif %}
+    </span>
+    <button id="syncToggleBtn" onclick="toggleSync()"
+      style="padding:8px 18px;border-radius:8px;border:none;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .2s;
+             background:{% if event.agent_sync_enabled %}var(--zs-success){% else %}var(--zs-violet){% endif %};color:#fff;">
+      {% if event.agent_sync_enabled %}Disable Sync{% else %}Enable Sync{% endif %}
+    </button>
+  </div>
+</div>
+
+<!-- Sync History -->
+<div style="margin-bottom:24px;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+    <h3 style="font-size:1rem;font-weight:700;color:var(--zs-text);margin:0;"><i class="bi bi-clock-history"></i> Agent Upload History</h3>
+    <button onclick="loadHistory()" style="background:none;border:none;color:var(--zs-violet);cursor:pointer;font-size:.8rem;font-weight:600;">↻ Refresh</button>
+  </div>
+  <div id="historyBox" style="background:var(--zs-surface);border:1px solid var(--glass-border);border-radius:var(--zs-radius);overflow:hidden;">
+    <div style="padding:14px;text-align:center;color:var(--zs-muted);font-size:.82rem;">Loading history…</div>
+  </div>
+</div>
+
 <!-- Photo grid -->
 <div class="photos-section">
   {% if photos %}
@@ -1093,6 +1127,68 @@ function pollProcessing() {
 {% if event.processed_photos < event.total_photos %}
 setTimeout(pollProcessing, 5000);
 {% endif %}
+
+// ── Agent Sync Toggle ──
+async function toggleSync() {
+  const btn = document.getElementById('syncToggleBtn');
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    const res = await fetch('{% url "toggle_agent_sync" event.slug %}', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF }
+    });
+    const data = await res.json();
+    const on = data.enabled;
+    document.getElementById('syncStatusText').textContent = on ? '● Sync ON' : '○ Sync OFF';
+    document.getElementById('syncStatusText').style.color = on ? 'var(--zs-success)' : 'var(--zs-muted)';
+    btn.textContent = on ? 'Disable Sync' : 'Enable Sync';
+    btn.style.background = on ? 'var(--zs-success)' : 'var(--zs-violet)';
+    showToast(on ? 'Agent sync enabled' : 'Agent sync disabled', on ? 'success' : 'info');
+  } catch(e) {
+    showToast('Failed to toggle sync', 'error');
+  }
+  btn.disabled = false;
+}
+
+// ── Agent History ──
+async function loadHistory() {
+  const box = document.getElementById('historyBox');
+  box.innerHTML = '<div style="padding:14px;text-align:center;color:var(--zs-muted);font-size:.82rem;">Loading…</div>';
+  try {
+    const res = await fetch('/api/agent/history/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    const all = await res.json();
+    const logs = all.filter(l => l.event_slug === SLUG);
+    if (!logs.length) {
+      box.innerHTML = '<div style="padding:20px;text-align:center;color:var(--zs-muted);font-size:.82rem;"><i class="bi bi-inbox" style="font-size:1.5rem;display:block;margin-bottom:6px;"></i>No agent uploads yet</div>';
+      return;
+    }
+    box.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:.8rem;">
+      <thead><tr style="background:var(--glass-subtle);border-bottom:1px solid var(--glass-border);">
+        <th style="padding:8px 12px;text-align:left;color:var(--zs-muted);font-weight:600;">File</th>
+        <th style="padding:8px 12px;text-align:left;color:var(--zs-muted);font-weight:600;">Uploaded At</th>
+        <th style="padding:8px 12px;text-align:center;color:var(--zs-muted);font-weight:600;">Faces</th>
+        <th style="padding:8px 12px;text-align:center;color:var(--zs-muted);font-weight:600;">Status</th>
+      </tr></thead>
+      <tbody>${logs.map((l,i) => `
+        <tr style="border-bottom:1px solid var(--glass-border);background:${i%2===0?'transparent':'var(--glass-subtle)'}">
+          <td style="padding:7px 12px;color:var(--zs-text);font-weight:500;">${l.filename}</td>
+          <td style="padding:7px 12px;color:var(--zs-muted);">${l.uploaded_at}</td>
+          <td style="padding:7px 12px;text-align:center;color:var(--zs-blue);font-weight:600;">${l.face_count}</td>
+          <td style="padding:7px 12px;text-align:center;">
+            <span style="padding:2px 8px;border-radius:99px;font-size:.72rem;font-weight:700;
+              background:${l.processed ? 'var(--zs-success-lt)' : 'var(--zs-warning-lt)'};
+              color:${l.processed ? 'var(--zs-success)' : 'var(--zs-warning)'};">
+              ${l.processed ? '✓ Indexed' : '⏳ Indexing'}
+            </span>
+          </td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  } catch(e) {
+    box.innerHTML = '<div style="padding:14px;text-align:center;color:var(--zs-danger);font-size:.82rem;">Failed to load history</div>';
+  }
+}
+loadHistory();
 
 // ── Lightbox ──
 let lbTiles = [];

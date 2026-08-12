@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from .models import Event
 from .forms import EventForm
 
@@ -51,6 +54,15 @@ def event_edit(request, slug):
     else:
         form = EventForm(instance=event)
     return render(request, 'events/event_form.html', {'form': form, 'action': 'Edit', 'event': event})
+
+
+@login_required
+@require_POST
+def toggle_agent_sync(request, slug):
+    event = get_object_or_404(Event, slug=slug, created_by=request.user)
+    event.agent_sync_enabled = not event.agent_sync_enabled
+    event.save(update_fields=['agent_sync_enabled'])
+    return JsonResponse({'enabled': event.agent_sync_enabled})
 
 
 @login_required

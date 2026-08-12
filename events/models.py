@@ -21,6 +21,8 @@ class Event(models.Model):
     event_date = models.DateField()
     description = models.TextField(blank=True)
     qr_code = models.ImageField(upload_to=qr_upload_path, blank=True, null=True)
+    watch_folder = models.CharField(max_length=500, blank=True)
+    agent_sync_enabled = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

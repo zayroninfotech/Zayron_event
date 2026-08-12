@@ -7,4 +7,5 @@ urlpatterns = [
     path('<slug:slug>/', views.event_detail, name='event_detail'),
     path('<slug:slug>/edit/', views.event_edit, name='event_edit'),
     path('<slug:slug>/delete/', views.event_delete, name='event_delete'),
+    path('<slug:slug>/toggle-sync/', views.toggle_agent_sync, name='toggle_agent_sync'),
 ]

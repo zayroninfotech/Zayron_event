@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
+from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from events.models import Event
 from photos.models import EventPhoto
@@ -52,6 +53,8 @@ def agent_events(request):
             'total_photos': e.total_photos,
             'processed_photos': e.processed_photos,
             'total_searches': searches,
+            'watch_folder': e.watch_folder,
+            'agent_sync_enabled': e.agent_sync_enabled,
         })
     return JsonResponse(data, safe=False)
 
@@ -93,6 +96,41 @@ def agent_upload_photo(request, slug):
         EventPhoto.objects.create(event=event, image=f)
         saved += 1
     return JsonResponse({'uploaded': saved, 'event': event.name})
+
+
+@csrf_exempt
+@require_http_methods(['GET'])
+def agent_history(request):
+    user = _token_auth(request)
+    if not user:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    events = Event.objects.filter(created_by=user)
+    photos = EventPhoto.objects.filter(event__in=events).order_by('-uploaded_at')[:100]
+    data = [{
+        'id': p.id,
+        'filename': p.filename,
+        'event': p.event.name,
+        'event_slug': p.event.slug,
+        'uploaded_at': p.uploaded_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'processed': p.processed,
+        'face_count': p.face_count,
+    } for p in photos]
+    return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def agent_toggle_sync(request, slug):
+    user = _token_auth(request)
+    if not user:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        event = Event.objects.get(slug=slug, created_by=user)
+    except Event.DoesNotExist:
+        return JsonResponse({'error': 'Event not found'}, status=404)
+    event.agent_sync_enabled = not event.agent_sync_enabled
+    event.save(update_fields=['agent_sync_enabled'])
+    return JsonResponse({'enabled': event.agent_sync_enabled, 'slug': slug})
 
 
 @csrf_exempt
