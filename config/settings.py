@@ -77,6 +77,11 @@ DATABASES = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# No file size limit — allow any size photos
+DATA_UPLOAD_MAX_MEMORY_SIZE = None
+FILE_UPLOAD_MAX_MEMORY_SIZE = None
+DATA_UPLOAD_MAX_NUMBER_FILES = 1000
+
 # ── MongoDB connection (used directly via pymongo through mongo_store.py) ──
 SITE_URL = env('SITE_URL', default='http://localhost:8000')
 MONGO_URI = env('MONGO_URI', default='')
