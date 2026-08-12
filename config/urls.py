@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from events.agent_api import agent_login, agent_events, agent_create_event, agent_upload_photo, agent_stats
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -11,6 +12,12 @@ urlpatterns = [
     path('event/', include('guests.urls')),
     path('photos/', include('photos.urls')),
     path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
+    # Agent API
+    path('api/agent/login/', agent_login, name='agent_login'),
+    path('api/agent/events/', agent_events, name='agent_events'),
+    path('api/agent/events/create/', agent_create_event, name='agent_create_event'),
+    path('api/agent/upload/<slug:slug>/', agent_upload_photo, name='agent_upload_photo'),
+    path('api/agent/stats/', agent_stats, name='agent_stats'),
 ]
 
 if settings.DEBUG:
