@@ -98,10 +98,9 @@ def agent_upload_photo(request, slug):
     return JsonResponse({'uploaded': saved, 'event': event.name})
 
 
-@csrf_exempt
 @require_http_methods(['GET'])
 def agent_history(request):
-    user = _token_auth(request)
+    user = _token_auth(request) or (request.user if request.user.is_authenticated else None)
     if not user:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
     events = Event.objects.filter(created_by=user)
