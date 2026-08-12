@@ -31,7 +31,7 @@ def _start_auto_indexer():
 def _indexer_loop():
     import time
     # Wait for Django to fully boot before first run
-    time.sleep(10)
+    time.sleep(60)
 
     while True:
         try:
