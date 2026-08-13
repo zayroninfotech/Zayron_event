@@ -11,7 +11,6 @@ _face_app = None
 def _get_face_app():
     global _face_app
     if _face_app is None:
-        import insightface
         from insightface.app import FaceAnalysis
         _face_app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
         _face_app.prepare(ctx_id=-1, det_size=(640, 640))
@@ -33,12 +32,10 @@ def process_event_photo(self, photo_id: int):
         return
 
     try:
-        import insightface  # noqa — check available
+        import insightface  # noqa
     except ImportError:
         logger.warning('insightface not installed — marking photo %s as processed', photo_id)
-        mongo_store.upsert_photo(photo_id, {
-            'event_id': photo.event_id,
-            'image_path': photo.image.name,
+        mongo_store.update_photo(photo_id, {
             'face_encodings': [],
             'face_count': 0,
             'processed': True,
@@ -54,7 +51,6 @@ def process_event_photo(self, photo_id: int):
         if img is None:
             raise ValueError(f'Cannot read image: {photo.image.path}')
 
-        # Resize large images to max 1920px to speed up detection
         h, w = img.shape[:2]
         if max(h, w) > 1920:
             scale = 1920 / max(h, w)
@@ -68,9 +64,7 @@ def process_event_photo(self, photo_id: int):
         logger.exception('Error processing photo %s', photo_id)
         raise self.retry(exc=exc)
 
-    mongo_store.upsert_photo(photo_id, {
-        'event_id': photo.event_id,
-        'image_path': photo.image.name,
+    mongo_store.update_photo(photo_id, {
         'face_encodings': embeddings,
         'face_count': face_count,
         'processed': True,

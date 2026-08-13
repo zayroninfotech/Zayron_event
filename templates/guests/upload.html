@@ -7,106 +7,142 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
       min-height: 100vh;
-      background: linear-gradient(160deg, #0b1f4f 0%, #1a3a80 60%, #0d2a69 100%);
-      display: flex; flex-direction: column; align-items: center;
-      padding: 0 16px 40px;
-      color: #fff;
+      background: #F4F6FB;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px 40px;
+      color: #1a1f36;
     }
 
-    /* Header */
-    .top-bar {
-      width: 100%; max-width: 480px;
-      display: flex; align-items: center; gap: 10px;
-      padding: 20px 0 28px;
-    }
-    .logo-box {
-      width: 36px; height: 36px; border-radius: 9px;
-      background: linear-gradient(135deg, #d69a16, #f3c65b);
-      display: grid; place-items: center;
-      font-size: 1.1rem; color: #111;
-    }
-    .logo-text { font-size: 1.1rem; font-weight: 800; }
-    .logo-text span { color: #f3c65b; }
-
-    /* Card */
     .card {
-      width: 100%; max-width: 480px;
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(201,162,39,.3);
-      border-radius: 20px;
-      padding: 32px 28px;
-      backdrop-filter: blur(8px);
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 4px 32px rgba(10,15,60,.10);
+      padding: 36px 32px 32px;
+      border: 1px solid #E8EBF4;
     }
 
+    /* Event info */
     .event-name {
-      font-size: 1.25rem; font-weight: 800;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #1a1f36;
       margin-bottom: 4px;
+      letter-spacing: -.3px;
     }
     .event-date {
-      font-size: .85rem; color: rgba(255,255,255,.55);
-      display: flex; align-items: center; gap: 5px;
+      font-size: .82rem;
+      color: #8492a6;
+      display: flex;
+      align-items: center;
+      gap: 5px;
       margin-bottom: 28px;
     }
 
     /* Upload zone */
     .upload-zone {
-      border: 2px dashed rgba(214,154,22,.55);
-      border-radius: 16px;
+      border: 2px dashed #D1D5E8;
+      border-radius: 18px;
       padding: 32px 16px;
       text-align: center;
       cursor: pointer;
       transition: border-color .2s, background .2s;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
+      background: #FAFBFF;
     }
-    .upload-zone:hover { border-color: #d69a16; background: rgba(214,154,22,.06); }
-    .upload-zone.has-image { border-style: solid; border-color: #d69a16; padding: 16px; }
+    .upload-zone:hover {
+      border-color: #635BEB;
+      background: #F5F4FF;
+    }
+    .upload-zone.has-image {
+      border-style: solid;
+      border-color: #635BEB;
+      padding: 20px 16px;
+      background: #F5F4FF;
+    }
 
     .preview-circle {
-      width: 130px; height: 130px;
+      width: 120px; height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid #d69a16;
+      border: 3px solid #635BEB;
       display: none;
-      margin: 0 auto 10px;
+      margin: 0 auto 12px;
     }
-    .cam-icon { font-size: 3rem; color: #d69a16; display: block; margin-bottom: 10px; }
-    .zone-text { font-size: .9rem; color: rgba(255,255,255,.6); }
-    .zone-sub  { font-size: .78rem; color: rgba(255,255,255,.4); margin-top: 5px; }
+    .cam-wrap {
+      width: 64px; height: 64px;
+      border-radius: 18px;
+      background: #EEEDFC;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 14px;
+    }
+    .cam-icon {
+      font-size: 1.8rem;
+      color: #635BEB;
+    }
+    .zone-text {
+      font-size: .9rem;
+      font-weight: 600;
+      color: #1a1f36;
+      margin-bottom: 4px;
+    }
+    .zone-sub {
+      font-size: .76rem;
+      color: #a0aec0;
+    }
+    .zone-change {
+      font-size: .78rem;
+      color: #635BEB;
+      font-weight: 600;
+      margin-top: 6px;
+    }
 
-    /* Submit button */
+    /* Submit */
     .btn-submit {
-      width: 100%; height: 54px;
+      width: 100%; height: 52px;
       border: none; border-radius: 12px; cursor: pointer;
-      background: linear-gradient(135deg, #b97804, #e3a91d);
-      color: #fff; font-size: 1.05rem; font-weight: 700;
+      background: #635BEB;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
       display: flex; align-items: center; justify-content: center; gap: 10px;
-      box-shadow: 0 8px 20px rgba(168,111,5,.3);
-      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 6px 20px rgba(99,91,235,.28);
+      transition: background .2s, transform .15s, box-shadow .15s;
+      letter-spacing: .01em;
     }
-    .btn-submit:hover  { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(168,111,5,.4); }
-    .btn-submit:disabled { opacity: .6; transform: none; cursor: default; }
+    .btn-submit:hover  { background: #4f47d0; box-shadow: 0 8px 24px rgba(99,91,235,.36); transform: translateY(-1px); }
+    .btn-submit:active { transform: scale(.98); }
+    .btn-submit:disabled { opacity: .65; cursor: default; transform: none; box-shadow: none; }
 
-    .error-msg { color: #ff8080; font-size: .82rem; margin-top: 8px; }
+    .error-msg {
+      color: #ef4444;
+      font-size: .8rem;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
     footer {
-      margin-top: 32px;
-      font-size: .75rem; color: rgba(255,255,255,.3); text-align: center;
+      margin-top: 24px;
+      font-size: .72rem;
+      color: #a0aec0;
+      text-align: center;
     }
-    footer span { color: #d69a16; }
+    footer a { color: #635BEB; text-decoration: none; }
   </style>
 </head>
 <body>
 
-<!-- Header -->
-<div class="top-bar">
-  <div class="logo-box"><i class="bi bi-camera-fill"></i></div>
-  <div class="logo-text">Zayro<span>Snap</span></div>
-</div>
-
-<!-- Card -->
 <div class="card">
   <div class="event-name">{{ event.name }}</div>
   <div class="event-date"><i class="bi bi-calendar3"></i> {{ event.event_date }}</div>
@@ -114,12 +150,13 @@
   <form method="post" enctype="multipart/form-data" id="uploadForm">
     {% csrf_token %}
 
-    <!-- Selfie upload zone -->
     <div class="upload-zone" id="uploadZone" onclick="document.getElementById('selfieInput').click()">
       <img id="preview" class="preview-circle" src="" alt="Preview">
-      <i class="bi bi-camera-fill cam-icon" id="camIcon"></i>
-      <div class="zone-text" id="zoneText">Tap to take or upload a selfie</div>
-      <div class="zone-sub" id="zoneSub">JPG, PNG or WEBP</div>
+      <div class="cam-wrap" id="camWrap">
+        <i class="bi bi-camera-fill cam-icon"></i>
+      </div>
+      <div class="zone-text" id="zoneText">Tap to upload your selfie</div>
+      <div class="zone-sub" id="zoneSub">JPG · PNG · WEBP</div>
     </div>
 
     <input type="file" id="selfieInput" name="selfie"
@@ -127,7 +164,7 @@
            onchange="previewSelfie(this)">
 
     {% if form.selfie.errors %}
-      <div class="error-msg">{{ form.selfie.errors }}</div>
+      <div class="error-msg"><i class="bi bi-exclamation-circle"></i> {{ form.selfie.errors }}</div>
     {% endif %}
 
     <button type="submit" class="btn-submit" id="submitBtn">
@@ -136,7 +173,7 @@
   </form>
 </div>
 
-<footer>© 2026 <span>ZayroSnap</span> — Powered by Zayron Infotech</footer>
+<footer>Powered by <a href="#">ZayroSnap</a></footer>
 
 <script>
 function previewSelfie(input) {
@@ -144,13 +181,12 @@ function previewSelfie(input) {
   const reader = new FileReader();
   reader.onload = e => {
     const preview = document.getElementById('preview');
-    const zone = document.getElementById('uploadZone');
     preview.src = e.target.result;
     preview.style.display = 'block';
-    document.getElementById('camIcon').style.display = 'none';
+    document.getElementById('camWrap').style.display = 'none';
     document.getElementById('zoneText').textContent = 'Tap to change selfie';
     document.getElementById('zoneSub').style.display = 'none';
-    zone.classList.add('has-image');
+    document.getElementById('uploadZone').classList.add('has-image');
   };
   reader.readAsDataURL(input.files[0]);
 }
@@ -158,9 +194,9 @@ function previewSelfie(input) {
 document.getElementById('uploadForm').addEventListener('submit', function () {
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span style="display:inline-block;width:18px;height:18px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;"></span> Searching…';
+  btn.innerHTML = '<span style="width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;"></span> Searching…';
 });
 </script>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 </body>
 </html>

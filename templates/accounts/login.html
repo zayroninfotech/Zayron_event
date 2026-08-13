@@ -15,24 +15,14 @@
     :root {
       --violet:      #635BEB;
       --violet-dark: #4F46D6;
-      --violet-2:    #7C6CF6;
       --violet-lt:   #EEEAFE;
-      --blue:        #3B82F6;
       --text:        #172033;
-      --muted:       rgba(23,32,51,.68);
-      --subtle:      rgba(23,32,51,.46);
+      --muted:       rgba(23,32,51,.60);
+      --subtle:      rgba(23,32,51,.40);
       --border:      #E7E9F0;
       --bg:          #F7F8FC;
-      --surface:     #FFFFFF;
       --danger:      #EF4444;
       --danger-lt:   #FEE2E2;
-
-      /* Glass system */
-      --glass-surface: rgba(255,255,255,.44);
-      --glass-strong:  rgba(255,255,255,.64);
-      --glass-subtle:  rgba(255,255,255,.26);
-      --glass-border:  rgba(255,255,255,.60);
-      --glass-blur:    26px;
     }
 
     body {
@@ -40,133 +30,58 @@
       color: var(--text);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      background:
-        radial-gradient(circle at 12% 18%, rgba(124,108,246,.16), transparent 42%),
-        radial-gradient(circle at 88% 12%, rgba(255,197,140,.14), transparent 38%),
-        linear-gradient(180deg, rgba(253,246,236,.42) 0%, rgba(244,239,253,.50) 45%, rgba(236,233,252,.58) 100%),
-        url("{% static 'img/hero-bg.jpg' %}");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      text-shadow: 0 1px 2px rgba(255,255,255,.35);
-    }
-
-    /* ── Layout ── */
-    .auth-wrap {
-      flex: 1;
-      display: flex;
-      align-items: stretch;
-      min-height: 100vh;
-    }
-
-    /* ── Left panel ── */
-    .left-panel {
-      flex: 0 0 420px;
-      background: linear-gradient(145deg, #4a3aa8 0%, var(--violet) 40%, var(--blue) 100%);
-      display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 48px 40px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .left-panel::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='28'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
-      pointer-events: none;
-    }
-    .left-panel-inner { position: relative; z-index: 1; }
-
-    .brand-icon {
-      width: 72px; height: 72px;
-      border-radius: 20px;
-      background: rgba(255,255,255,.15);
-      border: 1.5px solid rgba(255,255,255,.25);
-      display: grid; place-items: center;
-      font-size: 2rem;
-      color: #fff;
-      margin: 0 auto 24px;
-      backdrop-filter: blur(8px);
-    }
-    .brand-name {
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: -.5px;
-      margin-bottom: 12px;
-    }
-    .brand-name span { color: rgba(255,255,255,.6); }
-    .brand-tagline {
-      font-size: .9rem;
-      color: rgba(255,255,255,.65);
-      line-height: 1.6;
-      max-width: 280px;
-      margin: 0 auto 40px;
-    }
-    .brand-pills {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-    }
-    .brand-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(255,255,255,.1);
-      border: 1px solid rgba(255,255,255,.15);
-      border-radius: 99px;
-      padding: 5px 12px;
-      font-size: .78rem;
-      color: rgba(255,255,255,.60);
+      background: #F0F2FF;
     }
 
-    /* ── Right panel ── */
-    .right-panel {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 48px 40px;
-    }
-    .form-box {
+    .auth-card {
       width: 100%;
       max-width: 400px;
-      background: var(--glass-surface);
-      backdrop-filter: blur(var(--glass-blur));
-      -webkit-backdrop-filter: blur(var(--glass-blur));
-      border: 1px solid var(--glass-border);
-      border-radius: 22px;
-      box-shadow: 0 12px 36px rgba(23,32,51,.12), 0 2px 8px rgba(23,32,51,.06);
-      padding: 40px 36px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(99,91,235,.10), 0 2px 8px rgba(23,32,51,.06);
+      padding: 44px 40px 36px;
+      margin: 24px 16px;
+      text-align: center;
     }
-    @media (max-width: 460px) {
-      .form-box { padding: 28px 22px; border-radius: 18px; }
+
+    /* Avatar icon */
+    .avatar-wrap {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #7C6CF6, #635BEB);
+      display: grid;
+      place-items: center;
+      margin: 0 auto 24px;
+      box-shadow: 0 4px 18px rgba(99,91,235,.35);
+    }
+    .avatar-wrap i {
+      font-size: 1.9rem;
+      color: #fff;
     }
 
     .form-heading {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
       font-weight: 800;
       color: var(--text);
-      letter-spacing: -.3px;
-      margin-bottom: 4px;
+      letter-spacing: -.4px;
+      margin-bottom: 6px;
     }
+    .form-heading span { color: var(--violet); }
+
     .form-subheading {
       font-size: .875rem;
       color: var(--muted);
-      margin-bottom: 28px;
+      margin-bottom: 32px;
     }
 
     /* Error box */
     .error-box {
       background: var(--danger-lt);
       border: 1px solid #fca5a5;
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 10px 14px;
       margin-bottom: 20px;
       font-size: .85rem;
@@ -174,10 +89,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      text-align: left;
     }
 
-    /* Field */
-    .field-group { margin-bottom: 18px; }
+    /* Fields */
+    .field-group { margin-bottom: 16px; text-align: left; }
     .field-label {
       display: block;
       font-size: .82rem;
@@ -185,46 +101,40 @@
       color: var(--text);
       margin-bottom: 6px;
     }
-    .input-wrap {
-      position: relative;
-    }
+    .input-wrap { position: relative; }
     .input-icon {
       position: absolute;
-      left: 12px;
+      left: 13px;
       top: 50%;
       transform: translateY(-50%);
       color: var(--subtle);
-      font-size: .9rem;
+      font-size: .95rem;
       pointer-events: none;
     }
     .zs-input {
       width: 100%;
-      padding: 10px 40px 10px 36px;
-      border: 1.5px solid var(--glass-border);
-      border-radius: 8px;
+      padding: 11px 40px 11px 38px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
       font-family: 'Inter', sans-serif;
       font-size: .9rem;
       color: var(--text);
-      background: rgba(255,255,255,.55);
+      background: #FAFAFA;
       outline: none;
       transition: border-color .15s, box-shadow .15s, background .15s;
     }
     .zs-input:focus {
       border-color: var(--violet);
-      box-shadow: 0 0 0 3px rgba(99,91,235,.15);
-      background: rgba(255,255,255,.85);
+      box-shadow: 0 0 0 3px rgba(99,91,235,.12);
+      background: #fff;
     }
     .zs-input::placeholder { color: var(--subtle); }
-    .field-error {
-      font-size: .78rem;
-      color: var(--danger);
-      margin-top: 5px;
-    }
+    .field-error { font-size: .78rem; color: var(--danger); margin-top: 5px; }
 
     /* Password toggle */
     .pw-toggle {
       position: absolute;
-      right: 10px;
+      right: 11px;
       top: 50%;
       transform: translateY(-50%);
       background: none;
@@ -232,7 +142,7 @@
       color: var(--subtle);
       cursor: pointer;
       padding: 2px 4px;
-      font-size: .9rem;
+      font-size: .95rem;
       line-height: 1;
     }
     .pw-toggle:hover { color: var(--muted); }
@@ -262,14 +172,14 @@
     }
     .forgot-link:hover { text-decoration: underline; }
 
-    /* Submit button */
+    /* Submit */
     .btn-signin {
       width: 100%;
-      padding: 11px;
+      padding: 13px;
       background: var(--violet);
       color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-family: 'Inter', sans-serif;
       font-size: .95rem;
       font-weight: 700;
@@ -278,9 +188,10 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: background .15s, transform .1s;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      box-shadow: 0 4px 14px rgba(99,91,235,.30);
     }
-    .btn-signin:hover { background: var(--violet-dark); }
+    .btn-signin:hover { background: var(--violet-dark); box-shadow: 0 6px 20px rgba(99,91,235,.38); }
     .btn-signin:active { transform: scale(.99); }
     .btn-signin:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
@@ -297,110 +208,73 @@
     }
     .register-prompt a:hover { text-decoration: underline; }
 
-    /* Spinner */
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { animation: spin .7s linear infinite; display: inline-block; }
 
-    /* ── Responsive ── */
-    @media (max-width: 768px) {
-      .left-panel { display: none; }
-      .right-panel { padding: 40px 24px; }
-      .auth-wrap { align-items: flex-start; }
-    }
-    @media (max-width: 400px) {
-      .right-panel { padding: 32px 16px; }
+    @media (max-width: 440px) {
+      .auth-card { padding: 36px 24px 28px; }
+      .form-heading { font-size: 1.5rem; }
     }
   </style>
 </head>
 <body>
 
-<div class="auth-wrap">
+<div class="auth-card">
 
-  <!-- ── Left brand panel ── -->
-  <div class="left-panel">
-    <div class="left-panel-inner">
-      <div class="brand-icon"><i class="bi bi-camera"></i></div>
-      <div class="brand-name">Zayro<span>Snap</span></div>
-      <p class="brand-tagline">
-        AI-powered photo discovery for professional photographers and event organizers.
-      </p>
-      <div class="brand-pills">
-        <span class="brand-pill"><i class="bi bi-cpu"></i> Face AI</span>
-        <span class="brand-pill"><i class="bi bi-shield-check"></i> Private</span>
-        <span class="brand-pill"><i class="bi bi-qr-code"></i> QR Sharing</span>
-        <span class="brand-pill"><i class="bi bi-lightning"></i> Instant</span>
+  <div class="avatar-wrap">
+    <i class="bi bi-person"></i>
+  </div>
+
+  <h1 class="form-heading">Welcome <span>back</span></h1>
+  <p class="form-subheading">Sign in to your organizer account</p>
+
+  <form method="post" id="loginForm">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="error-box">
+      <i class="bi bi-exclamation-circle"></i>
+      <span>{{ form.non_field_errors }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Username -->
+    <div class="field-group">
+      <label class="field-label" for="id_username">Username</label>
+      <div class="input-wrap">
+        <i class="bi bi-person input-icon"></i>
+        <input class="zs-input" type="text" id="id_username" name="username"
+               placeholder="Enter your username"
+               value="{{ form.username.value|default:'' }}"
+               autocomplete="username" autofocus>
       </div>
+      {% if form.username.errors %}
+      <div class="field-error">{{ form.username.errors }}</div>
+      {% endif %}
     </div>
-  </div>
 
-  <!-- ── Right form panel ── -->
-  <div class="right-panel">
-    <div class="form-box">
-
-      <h1 class="form-heading">Welcome back</h1>
-      <p class="form-subheading">Sign in to your organizer account</p>
-
-      <form method="post" id="loginForm">
-        {% csrf_token %}
-
-        {% if form.non_field_errors %}
-        <div class="error-box">
-          <i class="bi bi-exclamation-circle"></i>
-          <span>{{ form.non_field_errors }}</span>
-        </div>
-        {% endif %}
-
-        <!-- Username -->
-        <div class="field-group">
-          <label class="field-label" for="id_username">Username</label>
-          <div class="input-wrap">
-            <i class="bi bi-person input-icon"></i>
-            <input class="zs-input" type="text" id="id_username" name="username"
-                   placeholder="Enter your username"
-                   value="{{ form.username.value|default:'' }}"
-                   autocomplete="username" autofocus>
-          </div>
-          {% if form.username.errors %}
-          <div class="field-error">{{ form.username.errors }}</div>
-          {% endif %}
-        </div>
-
-        <!-- Password -->
-        <div class="field-group">
-          <label class="field-label" for="id_password">Password</label>
-          <div class="input-wrap">
-            <i class="bi bi-lock input-icon"></i>
-            <input class="zs-input" type="password" id="id_password" name="password"
-                   placeholder="••••••••" autocomplete="current-password">
-            <button type="button" class="pw-toggle" onclick="togglePassword()" title="Show / hide password">
-              <i class="bi bi-eye-slash" id="eyeIcon"></i>
-            </button>
-          </div>
-          {% if form.password.errors %}
-          <div class="field-error">{{ form.password.errors }}</div>
-          {% endif %}
-        </div>
-
-        <!-- Options -->
-        <div class="form-options">
-          <label class="remember-label">
-            <input type="checkbox" name="remember"> Remember me
-          </label>
-          <a href="#" class="forgot-link">Forgot password?</a>
-        </div>
-
-        <!-- Submit -->
-        <button type="submit" class="btn-signin" id="loginBtn">
-          Sign In <i class="bi bi-arrow-right"></i>
+    <!-- Password -->
+    <div class="field-group">
+      <label class="field-label" for="id_password">Password</label>
+      <div class="input-wrap">
+        <i class="bi bi-lock input-icon"></i>
+        <input class="zs-input" type="password" id="id_password" name="password"
+               placeholder="••••••••" autocomplete="current-password">
+        <button type="button" class="pw-toggle" onclick="togglePassword()" title="Show / hide password">
+          <i class="bi bi-eye-slash" id="eyeIcon"></i>
         </button>
-      </form>
-
-      <p class="register-prompt">
-        No account? <a href="{% url 'register' %}">Create one</a>
-      </p>
-
+      </div>
+      {% if form.password.errors %}
+      <div class="field-error">{{ form.password.errors }}</div>
+      {% endif %}
     </div>
-  </div>
+
+    <!-- Submit -->
+    <button type="submit" class="btn-signin" id="loginBtn">
+      Sign In <i class="bi bi-arrow-right"></i>
+    </button>
+  </form>
+
 
 </div>
 

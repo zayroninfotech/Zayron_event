@@ -3,11 +3,11 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
-from django.utils import timezone
 from rest_framework.authtoken.models import Token
+import mongo_store
 from events.models import Event
 from photos.models import EventPhoto
-from guests.models import GuestUpload
+from photos.tasks import process_event_photo
 
 
 def _token_auth(request):
@@ -40,10 +40,9 @@ def agent_events(request):
     user = _token_auth(request)
     if not user:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
-    events = Event.objects.filter(created_by=user).order_by('-created_at')
+    events = Event.objects.filter(created_by=user)
     data = []
     for e in events:
-        searches = GuestUpload.objects.filter(event=e).count() if hasattr(GuestUpload, 'objects') else 0
         data.append({
             'id': e.id,
             'name': e.name,
@@ -52,7 +51,7 @@ def agent_events(request):
             'description': e.description,
             'total_photos': e.total_photos,
             'processed_photos': e.processed_photos,
-            'total_searches': searches,
+            'total_searches': mongo_store.count_guests(e.pk),
             'watch_folder': e.watch_folder,
             'agent_sync_enabled': e.agent_sync_enabled,
         })
@@ -74,7 +73,12 @@ def agent_create_event(request):
     description = data.get('description', '')
     if not name or not event_date:
         return JsonResponse({'error': 'name and event_date required'}, status=400)
-    event = Event.objects.create(name=name, event_date=event_date, description=description, created_by=user)
+    event = Event.create(
+        name=name,
+        event_date=event_date,
+        description=description,
+        created_by_id=user.pk,
+    )
     return JsonResponse({'id': event.id, 'slug': event.slug, 'name': event.name}, status=201)
 
 
@@ -84,16 +88,17 @@ def agent_upload_photo(request, slug):
     user = _token_auth(request)
     if not user:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
-    try:
-        event = Event.objects.get(slug=slug, created_by=user)
-    except Event.DoesNotExist:
+    doc = mongo_store.get_event_by_slug(slug)
+    if not doc or doc.get('created_by_id') != user.pk:
         return JsonResponse({'error': 'Event not found'}, status=404)
+    event = Event(doc)
     photos_files = request.FILES.getlist('photos')
     if not photos_files:
         return JsonResponse({'error': 'No photos provided'}, status=400)
     saved = 0
     for f in photos_files:
-        EventPhoto.objects.create(event=event, image=f)
+        photo = EventPhoto.objects.create(event=event, image=f)
+        process_event_photo.apply_async((photo.pk,), countdown=2)
         saved += 1
     return JsonResponse({'uploaded': saved, 'event': event.name})
 
@@ -103,17 +108,20 @@ def agent_history(request):
     user = _token_auth(request) or (request.user if request.user.is_authenticated else None)
     if not user:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
-    events = Event.objects.filter(created_by=user)
-    photos = EventPhoto.objects.filter(event__in=events).order_by('-uploaded_at')[:100]
+    event_docs = mongo_store.get_events_by_user(user.pk)
+    event_ids = [d['id'] for d in event_docs]
+    event_name_map = {d['id']: d['name'] for d in event_docs}
+    event_slug_map = {d['id']: d['slug'] for d in event_docs}
+    photo_docs = mongo_store.get_photos_for_events(event_ids)
     data = [{
-        'id': p.id,
-        'filename': p.filename,
-        'event': p.event.name,
-        'event_slug': p.event.slug,
-        'uploaded_at': p.uploaded_at.strftime('%Y-%m-%d %H:%M:%S'),
-        'processed': p.processed,
-        'face_count': p.face_count,
-    } for p in photos]
+        'id': p.get('id'),
+        'filename': __import__('os').path.basename(p.get('image', '')),
+        'event': event_name_map.get(p.get('event_id'), ''),
+        'event_slug': event_slug_map.get(p.get('event_id'), ''),
+        'uploaded_at': str(p.get('uploaded_at', '')),
+        'processed': p.get('processed', False),
+        'face_count': p.get('face_count', 0),
+    } for p in photo_docs]
     return JsonResponse(data, safe=False)
 
 
@@ -123,10 +131,10 @@ def agent_toggle_sync(request, slug):
     user = _token_auth(request)
     if not user:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
-    try:
-        event = Event.objects.get(slug=slug, created_by=user)
-    except Event.DoesNotExist:
+    doc = mongo_store.get_event_by_slug(slug)
+    if not doc or doc.get('created_by_id') != user.pk:
         return JsonResponse({'error': 'Event not found'}, status=404)
+    event = Event(doc)
     event.agent_sync_enabled = not event.agent_sync_enabled
     event.save(update_fields=['agent_sync_enabled'])
     return JsonResponse({'enabled': event.agent_sync_enabled, 'slug': slug})
@@ -138,15 +146,13 @@ def agent_stats(request):
     user = _token_auth(request)
     if not user:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
-    events = Event.objects.filter(created_by=user)
-    total_photos = sum(e.total_photos for e in events)
-    processed_photos = sum(e.processed_photos for e in events)
-    try:
-        total_searches = GuestUpload.objects.filter(event__in=events).count()
-    except Exception:
-        total_searches = 0
+    event_docs = mongo_store.get_events_by_user(user.pk)
+    event_ids = [d['id'] for d in event_docs]
+    total_photos = sum(mongo_store.count_photos(eid) for eid in event_ids)
+    processed_photos = sum(mongo_store.count_processed_photos(eid) for eid in event_ids)
+    total_searches = mongo_store.count_guests_for_events(event_ids)
     return JsonResponse({
-        'total_events': events.count(),
+        'total_events': len(event_ids),
         'total_photos': total_photos,
         'processed_photos': processed_photos,
         'total_searches': total_searches,

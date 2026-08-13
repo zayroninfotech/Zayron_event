@@ -1,4 +1,3 @@
-from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
@@ -6,7 +5,6 @@ from django.views.generic import RedirectView
 from events.agent_api import agent_login, agent_events, agent_create_event, agent_upload_photo, agent_stats, agent_history, agent_toggle_sync
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('dashboard/', include('events.urls')),
     path('event/', include('guests.urls')),

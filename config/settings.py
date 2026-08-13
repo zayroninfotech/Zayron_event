@@ -16,7 +16,6 @@ DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -26,7 +25,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_celery_results',
-    'django_celery_beat',
     # Local apps
     'config.apps.ConfigApp',
     'accounts',
@@ -66,23 +64,37 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# SQLite handles Django system tables (auth, sessions, admin, celery).
-# MongoDB (via pymongo) stores event/photo/guest data and face encodings.
+# ── Database — MongoDB for EVERYTHING (auth, sessions, tokens, app data) ──
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django_mongodb_backend',
+        'NAME': env('MONGO_DB', default='zayrosnap'),
+        'HOST': env('MONGO_HOST', default='localhost'),
+        'PORT': env.int('MONGO_PORT', default=27017),
     }
 }
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django_mongodb_backend.fields.ObjectIdAutoField'
 
-# No file size limit — allow any size photos
-DATA_UPLOAD_MAX_MEMORY_SIZE = None
-FILE_UPLOAD_MAX_MEMORY_SIZE = None
-DATA_UPLOAD_MAX_NUMBER_FILES = 1000
+# Custom user model — uses MongoDB ObjectId as PK
+AUTH_USER_MODEL = 'accounts.User'
 
-# ── MongoDB connection (used directly via pymongo through mongo_store.py) ──
+# Silence AutoField/ObjectId mismatch warnings for third-party apps
+SILENCED_SYSTEM_CHECKS = ['mongodb.E001']
+
+# Skip ORM migrations for our app models — managed directly by pymongo
+MIGRATION_MODULES = {
+    'events': None,
+    'photos': None,
+    'guests': None,
+}
+
+# Upload limits — DATA_UPLOAD_MAX_MEMORY_SIZE accepts None, FILE_UPLOAD_MAX_MEMORY_SIZE does not
+DATA_UPLOAD_MAX_MEMORY_SIZE  = None          # no limit on form data size
+FILE_UPLOAD_MAX_MEMORY_SIZE  = 2621440       # 2.5 MB — files larger than this stream to disk (Django default)
+DATA_UPLOAD_MAX_NUMBER_FILES = None          # no limit on number of files
+
+# ── MongoDB (pymongo direct access via mongo_store.py) ───────────────────
 SITE_URL = env('SITE_URL', default='http://localhost:8000')
 MONGO_URI = env('MONGO_URI', default='')
 MONGO_HOST = env('MONGO_HOST', default='localhost')
@@ -112,10 +124,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-DATA_UPLOAD_MAX_NUMBER_FILES = None
-DATA_UPLOAD_MAX_MEMORY_SIZE  = 500 * 1024 * 1024   # 500 MB per request
-FILE_UPLOAD_MAX_MEMORY_SIZE  = 500 * 1024 * 1024   # stream to disk above this
-
 # Celery
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='memory://')
 CELERY_RESULT_BACKEND = 'django-db'
@@ -124,7 +132,7 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_IGNORE_RESULT = True
-CELERY_TASK_ALWAYS_EAGER = True   # runs inline since no worker process on VPS
+CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = False
 
 # Auth redirects

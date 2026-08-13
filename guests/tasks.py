@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 _face_app = None
 
-SIMILARITY_THRESHOLD = 0.40   # cosine similarity — higher = stricter match
+SIMILARITY_THRESHOLD = 0.40
 
 
 def _get_face_app():
@@ -21,7 +21,7 @@ def _get_face_app():
 
 def _cosine_similarity(a, b):
     a, b = np.array(a), np.array(b)
-    denom = (np.linalg.norm(a) * np.linalg.norm(b))
+    denom = np.linalg.norm(a) * np.linalg.norm(b)
     if denom == 0:
         return 0.0
     return float(np.dot(a, b) / denom)
@@ -31,7 +31,7 @@ def _cosine_similarity(a, b):
 def match_guest_faces(self, guest_upload_id: int):
     """
     1. Generate ArcFace embedding from guest selfie.
-    2. Compare against all event photo embeddings stored in MongoDB.
+    2. Compare against all event photo embeddings in MongoDB.
     3. Save PhotoMatch records for matches above threshold.
     """
     try:
@@ -56,16 +56,11 @@ def match_guest_faces(self, guest_upload_id: int):
     try:
         # ── Fallback: no insightface → show all event photos ──────────────
         if not HAS_INSIGHTFACE:
-            photos = EventPhoto.objects.filter(event_id=upload.event_id)
-            for photo in photos:
-                PhotoMatch.objects.get_or_create(
-                    guest_upload=upload,
-                    photo=photo,
-                    defaults={'confidence': 0.0},
-                )
+            for doc in mongo_store.get_photos_by_event(upload.event_id):
+                photo = EventPhoto(doc)
+                mongo_store.create_or_update_match(guest_upload_id, photo.pk, 0.0)
             upload.status = 'done'
             upload.save(update_fields=['status'])
-            logger.info('Guest %s: fallback — %d photo(s)', guest_upload_id, photos.count())
             return
 
         # ── Load selfie and get ArcFace embedding ─────────────────────────
@@ -78,15 +73,13 @@ def match_guest_faces(self, guest_upload_id: int):
         if not faces:
             upload.status = 'no_face'
             upload.save(update_fields=['status'])
-            mongo_store.upsert_guest(guest_upload_id, {'status': 'no_face', 'face_encoding': []})
+            mongo_store.update_guest(guest_upload_id, {'status': 'no_face', 'face_encoding': []})
             return
 
-        # Use the largest detected face (most prominent)
         guest_face = max(faces, key=lambda f: (f.bbox[2] - f.bbox[0]) * (f.bbox[3] - f.bbox[1]))
         guest_emb = guest_face.embedding.tolist()
 
-        mongo_store.upsert_guest(guest_upload_id, {
-            'event_id': upload.event_id,
+        mongo_store.update_guest(guest_upload_id, {
             'face_encoding': guest_emb,
             'status': 'processing',
         })
@@ -98,35 +91,23 @@ def match_guest_faces(self, guest_upload_id: int):
         for doc in photo_docs:
             if not doc.get('face_encodings'):
                 continue
-
             best_sim = max(
                 _cosine_similarity(guest_emb, enc)
                 for enc in doc['face_encodings']
             )
-
             if best_sim >= SIMILARITY_THRESHOLD:
-                photo_id = doc['photo_id']
-                try:
-                    photo = EventPhoto.objects.get(pk=photo_id)
-                    PhotoMatch.objects.get_or_create(
-                        guest_upload=upload,
-                        photo=photo,
-                        defaults={'confidence': best_sim},
-                    )
-                except EventPhoto.DoesNotExist:
-                    pass
-
-                mongo_store.insert_match(guest_upload_id, photo_id, best_sim)
+                photo_id = doc['id']
+                mongo_store.create_or_update_match(guest_upload_id, photo_id, best_sim)
                 matches_created += 1
 
         upload.status = 'done'
         upload.save(update_fields=['status'])
-        mongo_store.upsert_guest(guest_upload_id, {'status': 'done'})
+        mongo_store.update_guest(guest_upload_id, {'status': 'done'})
         logger.info('Guest %s: %d match(es)', guest_upload_id, matches_created)
 
     except Exception as exc:
         logger.exception('Error matching guest %s', guest_upload_id)
         upload.status = 'failed'
         upload.save(update_fields=['status'])
-        mongo_store.upsert_guest(guest_upload_id, {'status': 'failed'})
+        mongo_store.update_guest(guest_upload_id, {'status': 'failed'})
         raise self.retry(exc=exc)

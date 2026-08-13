@@ -519,6 +519,103 @@
   .dl-btn { background: var(--zs-violet); }
   .dl-btn:hover { background: var(--zs-violet-dark); transform: scale(1.1); color: #fff; }
 
+  /* ── Multi-select ── */
+  .photo-tile.selectable { cursor: pointer; }
+  .photo-tile.selected .photo-thumb-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(99,91,235,.35);
+    z-index: 3;
+  }
+  .photo-check {
+    display: none;
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid rgba(255,255,255,.7);
+    z-index: 5;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    color: var(--zs-violet);
+  }
+  .selectable .photo-check { display: flex; }
+  .photo-tile.selected .photo-check {
+    background: var(--zs-violet);
+    border-color: var(--zs-violet);
+    color: #fff;
+  }
+  .selectable .photo-overlay { display: none !important; }
+
+  /* Floating action bar */
+  #multiSelectBar {
+    display: none;
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 8000;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(10,15,35,.22);
+    padding: 12px 20px;
+    align-items: center;
+    gap: 14px;
+    min-width: 320px;
+    animation: barSlideUp .2s ease;
+  }
+  @keyframes barSlideUp { from { opacity:0; transform:translateX(-50%) translateY(16px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+  #multiSelectBar.open { display: flex; }
+  .bar-count {
+    flex: 1;
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--zs-text);
+  }
+  .bar-count span { color: var(--zs-violet); }
+  .btn-bar-all {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--zs-muted);
+    background: none;
+    border: 1px solid var(--zs-border);
+    border-radius: 7px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-bar-all:hover { border-color: var(--zs-violet); color: var(--zs-violet); }
+  .btn-bar-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .85rem;
+    font-weight: 700;
+    background: var(--zs-danger);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-bar-delete:hover { background: #dc2626; }
+  .btn-bar-delete:disabled { opacity: .6; cursor: not-allowed; }
+  .btn-bar-cancel {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--zs-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 4px;
+    transition: color .15s;
+  }
+  .btn-bar-cancel:hover { color: var(--zs-text); }
+
   /* Empty state */
   .photos-empty {
     text-align: center;
@@ -797,14 +894,62 @@
   </div>
 </div>
 
-<!-- Sync History -->
-<div style="margin-bottom:24px;">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-    <h3 style="font-size:1rem;font-weight:700;color:var(--zs-text);margin:0;"><i class="bi bi-clock-history"></i> Agent Upload History</h3>
-    <button onclick="loadHistory()" style="background:none;border:none;color:var(--zs-violet);cursor:pointer;font-size:.8rem;font-weight:600;">↻ Refresh</button>
-  </div>
-  <div id="historyBox" style="background:var(--zs-surface);border:1px solid var(--glass-border);border-radius:var(--zs-radius);overflow:hidden;">
-    <div style="padding:14px;text-align:center;color:var(--zs-muted);font-size:.82rem;">Loading history…</div>
+<!-- Sync History button -->
+<div style="margin-bottom:24px;display:flex;align-items:center;gap:10px;">
+  <button onclick="openHistoryModal()" style="
+    display:inline-flex;align-items:center;gap:7px;
+    padding:9px 18px;border-radius:9px;border:1.5px solid var(--glass-border);
+    background:var(--glass-surface);backdrop-filter:blur(var(--glass-blur));
+    color:var(--zs-text);font-size:.85rem;font-weight:600;cursor:pointer;
+    transition:border-color .15s,background .15s,color .15s;
+  " onmouseover="this.style.borderColor='var(--zs-violet)';this.style.color='var(--zs-violet)';this.style.background='var(--zs-violet-lt)'"
+     onmouseout="this.style.borderColor='';this.style.color='';this.style.background=''">
+    <i class="bi bi-clock-history"></i> Agent Upload History
+  </button>
+</div>
+
+<!-- History Modal -->
+<div id="historyOverlay" onclick="if(event.target===this)closeHistoryModal()" style="
+  display:none;position:fixed;inset:0;z-index:6000;
+  background:rgba(10,15,35,.55);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;padding:20px;
+">
+  <div style="
+    background:#fff;border-radius:20px;
+    box-shadow:0 24px 60px rgba(10,15,35,.22);
+    width:100%;max-width:680px;max-height:80vh;
+    display:flex;flex-direction:column;
+    animation:ceSlideIn .22s ease;
+  ">
+    <!-- Modal header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 24px 16px;border-bottom:1px solid var(--glass-border);">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <i class="bi bi-clock-history" style="color:var(--zs-violet);font-size:1.1rem;"></i>
+        <span style="font-size:1rem;font-weight:800;color:var(--zs-text);">Agent Upload History</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="loadHistory()" style="
+          display:inline-flex;align-items:center;gap:5px;
+          background:none;border:1px solid var(--glass-border);
+          border-radius:7px;padding:5px 12px;font-size:.78rem;font-weight:600;
+          color:var(--zs-violet);cursor:pointer;transition:background .15s;
+        ">↻ Refresh</button>
+        <button onclick="closeHistoryModal()" style="
+          width:30px;height:30px;border-radius:50%;border:none;
+          background:var(--zs-bg);color:var(--zs-muted);cursor:pointer;
+          display:grid;place-items:center;font-size:.9rem;
+          transition:background .15s;
+        "><i class="bi bi-x-lg"></i></button>
+      </div>
+    </div>
+    <!-- Modal body (scrollable) -->
+    <div style="flex:1;overflow-y:auto;padding:16px 24px 20px;">
+      <div id="historyBox" style="background:var(--zs-surface);border:1px solid var(--glass-border);border-radius:var(--zs-radius);overflow:hidden;">
+        <div style="padding:20px;text-align:center;color:var(--zs-muted);font-size:.82rem;">
+          <i class="bi bi-inbox" style="font-size:1.5rem;display:block;margin-bottom:6px;"></i>Loading…
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -814,6 +959,17 @@
   <div class="photos-section-header">
     <h3 class="photos-section-title">Photo Library</h3>
     <span class="photo-count-badge">{{ photos|length }}</span>
+    <button id="selectToggleBtn" onclick="toggleSelectMode()" style="
+      margin-left:auto;
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 14px;border-radius:8px;
+      border:1.5px solid var(--glass-border);
+      background:var(--glass-surface);
+      color:var(--zs-muted);font-size:.8rem;font-weight:600;
+      cursor:pointer;transition:border-color .15s,color .15s,background .15s;
+    ">
+      <i class="bi bi-check2-square"></i> Select
+    </button>
   </div>
   <div class="photo-grid" id="photoGrid">
     {% for photo in photos %}
@@ -821,8 +977,10 @@
          data-src="{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.image.url }}{% endif %}"
          data-full="{{ photo.image.url }}"
          data-name="{{ photo.filename }}"
-         onclick="openLightbox(this)">
+         data-id="{{ photo.pk }}"
+         onclick="handlePhotoClick(event, this)">
       <div class="photo-thumb-wrap">
+        <div class="photo-check"><i class="bi bi-check-lg"></i></div>
         {% if photo.thumbnail %}
           <img src="{{ photo.thumbnail.url }}" alt="{{ photo.filename }}" loading="lazy" draggable="false">
         {% else %}
@@ -866,6 +1024,16 @@
   {% endif %}
 </div>
 
+<!-- Multi-select floating action bar -->
+<div id="multiSelectBar">
+  <div class="bar-count"><span id="barCount">0</span> selected</div>
+  <button class="btn-bar-all" onclick="selectAll()">Select All</button>
+  <button class="btn-bar-delete" id="barDeleteBtn" onclick="deleteSelected()">
+    <i class="bi bi-trash"></i> Delete
+  </button>
+  <button class="btn-bar-cancel" onclick="toggleSelectMode()">Cancel</button>
+</div>
+
 <!-- Lightbox -->
 <div id="lightbox" role="dialog" aria-modal="true">
   <button class="lb-close" onclick="closeLightbox()" title="Close">
@@ -886,33 +1054,6 @@
   </div>
 </div>
 
-<!-- Upload Overlay Loader -->
-<div id="uploadOverlay" style="
-  display:none; position:fixed; inset:0; z-index:9998;
-  background:rgba(10,15,35,.82); backdrop-filter:blur(6px);
-  flex-direction:column; align-items:center; justify-content:center; gap:20px;
-">
-  <div style="
-    background:#fff; border-radius:20px; padding:36px 40px;
-    text-align:center; width:min(420px,90vw);
-    box-shadow:0 20px 60px rgba(0,0,0,.4);
-  ">
-    <div style="font-size:2.5rem; margin-bottom:12px;">📤</div>
-    <div style="font-size:1rem; font-weight:700; color:#172033; margin-bottom:4px;" id="overlayLabel">Uploading photos…</div>
-    <div style="font-size:.82rem; color:#667085; margin-bottom:20px;" id="overlayCounter">0 / 0</div>
-
-    <!-- Big progress bar -->
-    <div style="height:12px; border-radius:99px; background:#E7E9F0; overflow:hidden; margin-bottom:10px;">
-      <div id="overlayFill" style="
-        height:100%; border-radius:99px; width:0%;
-        background:linear-gradient(90deg,#635BEB,#3B82F6);
-        transition:width .3s;
-      "></div>
-    </div>
-    <div style="font-size:.78rem; color:#98A2B3;" id="overlayPct">0%</div>
-    <div style="font-size:.75rem; color:#98A2B3; margin-top:8px;" id="overlayBatch"></div>
-  </div>
-</div>
 
 {% endblock %}
 
@@ -921,7 +1062,8 @@
 const SLUG       = '{{ event.slug }}';
 const UPLOAD_URL = '{% url "bulk_upload" event.slug %}';
 const CSRF       = '{{ csrf_token }}';
-const CHUNK_SIZE = 5; // 5 photos per batch to handle large files reliably
+const CHUNK_SIZE   = 10;  // photos per batch
+const CONCURRENCY  = 3;   // batches uploading in parallel
 
 // ── Download with spinner (fetch → blob → save) ──
 function extractFilename(res, fallback) {
@@ -1020,81 +1162,159 @@ document.getElementById('photoInput').addEventListener('change', function () {
   this.value = '';
 });
 
-// ── Chunked upload ──
+// ── Parallel chunked upload (inline progress, no page reload) ──
+let uploadQueue = [];   // files waiting to be processed
+let uploading   = false;
+
 async function startUpload(files) {
-  const total  = files.length;
-
-  // Show overlay immediately
-  const overlay       = document.getElementById('uploadOverlay');
-  const overlayLabel  = document.getElementById('overlayLabel');
-  const overlayCtr    = document.getElementById('overlayCounter');
-  const overlayFill   = document.getElementById('overlayFill');
-  const overlayPct    = document.getElementById('overlayPct');
-  const overlayBatch  = document.getElementById('overlayBatch');
-  overlay.style.display    = 'flex';
-  overlayLabel.textContent = `Uploading ${total} photo${total !== 1 ? 's' : ''}…`;
-  overlayCtr.textContent   = `0 of ${total} photos`;
-  overlayBatch.textContent = '';
-
-  const chunks = [];
-  for (let i = 0; i < total; i += CHUNK_SIZE) chunks.push(files.slice(i, i + CHUNK_SIZE));
+  uploadQueue.push(...files);
+  if (uploading) return;   // already running — new files will be picked up
+  uploading = true;
 
   const statusBox = document.getElementById('uploadStatus');
-  const label     = document.getElementById('uploadLabel');
-  const counter   = document.getElementById('uploadCounter');
   const fill      = document.getElementById('uploadFill');
+  const counter   = document.getElementById('uploadCounter');
+  const label     = document.getElementById('uploadLabel');
 
-  function setProgress(done, ttl, batchIdx, batchTotal) {
-    const pct = ttl > 0 ? Math.round(done / ttl * 100) : 0;
-    fill.style.width    = pct + '%';
-    counter.textContent = `${done} / ${ttl}`;
-    overlayFill.style.width = pct + '%';
-    overlayPct.textContent  = pct + '%';
-    overlayCtr.textContent  = `${done} of ${ttl} photos uploaded`;
-    overlayBatch.textContent = batchTotal > 1 ? `Batch ${batchIdx + 1} of ${batchTotal}` : '';
-  }
+  // Lock dropzone visually (but keep it droppable — new drops queue up)
+  dropZone.style.opacity = '.55';
 
-  statusBox.style.display = 'block';
-  dropZone.style.pointerEvents = 'none';
-  dropZone.style.opacity = '.45';
+  let totalUploaded = 0;
+  let totalFailed   = 0;
 
-  let uploaded = 0;
-  for (let i = 0; i < chunks.length; i++) {
-    label.textContent = chunks.length > 1 ? `Uploading batch ${i + 1} of ${chunks.length}…` : 'Uploading…';
-    setProgress(uploaded, total, i, chunks.length);
+  while (uploadQueue.length > 0) {
+    // Grab everything currently queued
+    const batch = uploadQueue.splice(0, uploadQueue.length);
+    const total = batch.length;
 
-    const fd = new FormData();
-    chunks[i].forEach(f => fd.append('photos', f));
-    try {
-      const res = await fetch(UPLOAD_URL, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-        body: fd,
-      });
-      if (!res.ok) throw new Error(`Server error on batch ${i + 1}`);
-      uploaded += (await res.json()).uploaded;
-    } catch (err) {
-      label.textContent        = `Upload error: ${err.message}`;
-      overlayLabel.textContent = `Error: ${err.message}`;
-      overlayFill.style.background = '#EF4444';
-      dropZone.style.pointerEvents = '';
-      dropZone.style.opacity = '';
-      setTimeout(() => { overlay.style.display = 'none'; }, 3000);
-      return;
+    statusBox.style.display = 'block';
+    fill.style.background   = 'linear-gradient(90deg,var(--zs-violet),var(--zs-blue))';
+    fill.style.width        = '0%';
+
+    const chunks = [];
+    for (let i = 0; i < total; i += CHUNK_SIZE) chunks.push(batch.slice(i, i + CHUNK_SIZE));
+
+    let done   = 0;
+    let failed = 0;
+    const newPhotos = [];
+
+    function setProgress() {
+      const pct = total > 0 ? Math.round((done + failed) / total * 100) : 0;
+      fill.style.width    = pct + '%';
+      counter.textContent = `${done} / ${total}`;
+      label.textContent   = uploadQueue.length > 0
+        ? `Uploading… (+${uploadQueue.length} queued)`
+        : `Uploading ${total} photo${total !== 1 ? 's' : ''}…`;
     }
 
-    setProgress(uploaded, total, i, chunks.length);
+    setProgress();
+
+    async function uploadChunk(chunk) {
+      const fd = new FormData();
+      chunk.forEach(f => fd.append('photos', f));
+      try {
+        const res = await fetch(UPLOAD_URL, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
+          body: fd,
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        done += data.uploaded;
+        if (data.photos) newPhotos.push(...data.photos);
+      } catch {
+        failed += chunk.length;
+      }
+      setProgress();
+    }
+
+    let ci = 0;
+    const workers = Array.from({ length: Math.min(CONCURRENCY, chunks.length) }, async () => {
+      while (ci < chunks.length) await uploadChunk(chunks[ci++]);
+    });
+    await Promise.all(workers);
+
+    totalUploaded += done;
+    totalFailed   += failed;
+
+    // Inject new photo tiles into the grid
+    if (newPhotos.length) injectPhotoTiles(newPhotos);
   }
 
-  label.textContent        = `${uploaded} photo${uploaded !== 1 ? 's' : ''} uploaded`;
-  overlayLabel.textContent = `✅ ${uploaded} photo${uploaded !== 1 ? 's' : ''} uploaded!`;
-  overlayBatch.textContent = 'Refreshing…';
-  overlayFill.style.background = '#22C55E';
-  fill.style.background        = 'var(--zs-success)';
-  dropZone.style.pointerEvents = '';
-  dropZone.style.opacity       = '';
+  // All queued files done
+  dropZone.style.opacity = '';
+  fill.style.background  = totalFailed ? '#EF4444' : '#22C55E';
+  fill.style.width       = '100%';
+  label.textContent      = totalFailed
+    ? `${totalUploaded} uploaded, ${totalFailed} failed`
+    : `✓ ${totalUploaded} photo${totalUploaded !== 1 ? 's' : ''} uploaded`;
+  counter.textContent = `${totalUploaded} / ${totalUploaded + totalFailed}`;
 
-  setTimeout(() => location.reload(), 1000);
+  // Update stats strip counts
+  const tCount = document.getElementById('totalCount');
+  if (tCount) tCount.textContent = parseInt(tCount.textContent || 0) + totalUploaded;
+
+  setTimeout(() => {
+    statusBox.style.display = 'none';
+    fill.style.width  = '0%';
+    fill.style.background = '';
+  }, 2500);
+
+  uploading = false;
+}
+
+function injectPhotoTiles(photos) {
+  let grid = document.getElementById('photoGrid');
+  // If grid doesn't exist yet (first upload on empty event), create it
+  if (!grid) {
+    const section = document.querySelector('.photos-section');
+    if (section) {
+      section.innerHTML = `
+        <div class="photos-section-header">
+          <h3 class="photos-section-title">Photo Library</h3>
+          <span class="photo-count-badge" id="photoCountBadge">0</span>
+          <button id="selectToggleBtn" onclick="toggleSelectMode()" style="
+            margin-left:auto;display:inline-flex;align-items:center;gap:6px;
+            padding:6px 14px;border-radius:8px;border:1.5px solid var(--glass-border);
+            background:var(--glass-surface);color:var(--zs-muted);font-size:.8rem;
+            font-weight:600;cursor:pointer;transition:border-color .15s,color .15s,background .15s;">
+            <i class="bi bi-check2-square"></i> Select
+          </button>
+        </div>
+        <div class="photo-grid" id="photoGrid"></div>`;
+      grid = document.getElementById('photoGrid');
+    }
+  }
+  if (!grid) return;
+
+  const deleteUrlBase = '{% url "delete_photo" 0 %}'.replace('/0/', '/');
+  photos.forEach(p => {
+    const thumb = p.thumbnail_url || p.image_url;
+    const tile  = document.createElement('div');
+    tile.className = 'photo-tile';
+    tile.dataset.src  = thumb;
+    tile.dataset.full = p.image_url;
+    tile.dataset.name = p.filename;
+    tile.dataset.id   = p.id;
+    tile.setAttribute('onclick', 'handlePhotoClick(event, this)');
+    tile.innerHTML = `
+      <div class="photo-thumb-wrap">
+        <div class="photo-check"><i class="bi bi-check-lg"></i></div>
+        <img src="${thumb}" alt="${p.filename}" loading="lazy" draggable="false">
+        <span class="face-badge indexing"><i class="bi bi-arrow-clockwise"></i> Indexing</span>
+        <div class="photo-overlay" onclick="event.stopPropagation()">
+          <button class="del-btn" title="Delete photo"
+            onclick="event.stopPropagation();if(confirm('Delete this photo?'))deleteSingleInline(${p.id},this)">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>`;
+    grid.prepend(tile);
+  });
+
+  // Update count badge
+  const badge = document.querySelector('.photo-count-badge');
+  if (badge) badge.textContent = document.querySelectorAll('.photo-tile').length;
 }
 
 // ── Processing poll ──
@@ -1151,16 +1371,34 @@ async function toggleSync() {
   btn.disabled = false;
 }
 
-// ── Agent History ──
+// ── Agent History Modal ──
+function openHistoryModal() {
+  const overlay = document.getElementById('historyOverlay');
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  loadHistory();
+}
+
+function closeHistoryModal() {
+  document.getElementById('historyOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('historyOverlay').style.display === 'flex') {
+    closeHistoryModal();
+  }
+});
+
 async function loadHistory() {
   const box = document.getElementById('historyBox');
-  box.innerHTML = '<div style="padding:14px;text-align:center;color:var(--zs-muted);font-size:.82rem;">Loading…</div>';
+  box.innerHTML = '<div style="padding:20px;text-align:center;color:var(--zs-muted);font-size:.82rem;"><i class="bi bi-inbox" style="font-size:1.5rem;display:block;margin-bottom:6px;"></i>Loading…</div>';
   try {
     const res = await fetch('/api/agent/history/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
     const all = await res.json();
     const logs = all.filter(l => l.event_slug === SLUG);
     if (!logs.length) {
-      box.innerHTML = '<div style="padding:20px;text-align:center;color:var(--zs-muted);font-size:.82rem;"><i class="bi bi-inbox" style="font-size:1.5rem;display:block;margin-bottom:6px;"></i>No agent uploads yet</div>';
+      box.innerHTML = '<div style="padding:32px;text-align:center;color:var(--zs-muted);font-size:.82rem;"><i class="bi bi-inbox" style="font-size:2rem;display:block;margin-bottom:8px;opacity:.4;"></i>No agent uploads yet</div>';
       return;
     }
     box.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:.8rem;">
@@ -1188,7 +1426,109 @@ async function loadHistory() {
     box.innerHTML = '<div style="padding:14px;text-align:center;color:var(--zs-danger);font-size:.82rem;">Failed to load history</div>';
   }
 }
-loadHistory();
+
+// ── Single inline delete (for dynamically added tiles) ──
+async function deleteSingleInline(photoId, btn) {
+  const tile = btn.closest('.photo-tile');
+  try {
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', CSRF);
+    const res = await fetch(`/photos/${photoId}/delete/`, { method: 'POST', body: fd });
+    if (res.ok || res.redirected) {
+      tile.remove();
+      const badge = document.querySelector('.photo-count-badge');
+      if (badge) badge.textContent = document.querySelectorAll('.photo-tile').length;
+      showToast('Photo deleted', 'success');
+    }
+  } catch { showToast('Delete failed', 'error'); }
+}
+
+// ── Multi-select ──
+const BULK_DELETE_URL = '{% url "bulk_delete_photos" event.slug %}';
+let selectMode = false;
+
+function toggleSelectMode() {
+  selectMode = !selectMode;
+  const tiles  = document.querySelectorAll('.photo-tile');
+  const bar    = document.getElementById('multiSelectBar');
+  const btn    = document.getElementById('selectToggleBtn');
+
+  tiles.forEach(t => {
+    t.classList.toggle('selectable', selectMode);
+    if (!selectMode) t.classList.remove('selected');
+  });
+
+  if (selectMode) {
+    bar.classList.add('open');
+    btn.style.borderColor = 'var(--zs-violet)';
+    btn.style.color       = 'var(--zs-violet)';
+    btn.style.background  = 'var(--zs-violet-lt)';
+    btn.innerHTML         = '<i class="bi bi-x-lg"></i> Cancel';
+  } else {
+    bar.classList.remove('open');
+    btn.style.borderColor = '';
+    btn.style.color       = '';
+    btn.style.background  = '';
+    btn.innerHTML         = '<i class="bi bi-check2-square"></i> Select';
+  }
+  updateBar();
+}
+
+function handlePhotoClick(e, tile) {
+  if (selectMode) {
+    e.stopPropagation();
+    tile.classList.toggle('selected');
+    updateBar();
+  } else {
+    openLightbox(tile);
+  }
+}
+
+function updateBar() {
+  const count = document.querySelectorAll('.photo-tile.selected').length;
+  document.getElementById('barCount').textContent = count;
+  document.getElementById('barDeleteBtn').disabled = count === 0;
+}
+
+function selectAll() {
+  const all = document.querySelectorAll('.photo-tile.selectable');
+  const allSelected = [...all].every(t => t.classList.contains('selected'));
+  all.forEach(t => t.classList.toggle('selected', !allSelected));
+  document.querySelector('.btn-bar-all').textContent = allSelected ? 'Select All' : 'Deselect All';
+  updateBar();
+}
+
+async function deleteSelected() {
+  const tiles = [...document.querySelectorAll('.photo-tile.selected')];
+  if (!tiles.length) return;
+  if (!confirm(`Delete ${tiles.length} photo${tiles.length !== 1 ? 's' : ''}? This cannot be undone.`)) return;
+
+  const btn = document.getElementById('barDeleteBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-arrow-clockwise" style="animation:dlspin .7s linear infinite;display:inline-block"></i> Deleting…';
+
+  const ids = tiles.map(t => t.dataset.id);
+  try {
+    const res = await fetch(BULK_DELETE_URL, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ photo_ids: ids }),
+    });
+    const data = await res.json();
+    // Remove deleted tiles from the DOM immediately
+    tiles.forEach(t => t.remove());
+    const remaining = document.querySelectorAll('.photo-tile').length;
+    const badge = document.querySelector('.photo-count-badge');
+    if (badge) badge.textContent = remaining;
+    showToast(`${data.deleted} photo${data.deleted !== 1 ? 's' : ''} deleted`, 'success');
+    if (remaining === 0) setTimeout(() => location.reload(), 800);
+    else toggleSelectMode();
+  } catch (e) {
+    showToast('Delete failed — please try again', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-trash"></i> Delete';
+  }
+}
 
 // ── Lightbox ──
 let lbTiles = [];

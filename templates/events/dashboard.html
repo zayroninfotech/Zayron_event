@@ -450,10 +450,152 @@
     color: var(--zs-muted);
     font-size: .9rem;
   }
+
+  /* ── Create Event Modal ── */
+  .ce-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    background: rgba(10,15,35,.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .ce-overlay.open { display: flex; }
+  .ce-modal {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(10,15,35,.22);
+    width: 100%;
+    max-width: 480px;
+    padding: 32px 28px 24px;
+    position: relative;
+    animation: ceSlideIn .22s ease;
+  }
+  @keyframes ceSlideIn { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+  .ce-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--zs-bg);
+    border: none;
+    color: var(--zs-muted);
+    font-size: 1rem;
+    cursor: pointer;
+    display: grid; place-items: center;
+    transition: background .15s, color .15s;
+  }
+  .ce-close:hover { background: var(--zs-border); color: var(--zs-text); }
+  .ce-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--zs-text);
+    margin-bottom: 4px;
+    letter-spacing: -.3px;
+  }
+  .ce-sub {
+    font-size: .82rem;
+    color: var(--zs-muted);
+    margin-bottom: 24px;
+  }
+  .ce-field { margin-bottom: 16px; }
+  .ce-label {
+    display: block;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--zs-text);
+    margin-bottom: 5px;
+  }
+  .ce-input {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1.5px solid var(--zs-border);
+    border-radius: 9px;
+    font-size: .9rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--zs-text);
+    background: #FAFAFA;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .ce-input:focus { border-color: var(--zs-violet); box-shadow: 0 0 0 3px rgba(99,91,235,.12); background: #fff; }
+  .ce-input::placeholder { color: var(--zs-subtle); }
+  textarea.ce-input { resize: vertical; min-height: 80px; }
+  .ce-hint { font-size: .74rem; color: var(--zs-subtle); margin-top: 4px; }
+  .ce-error { font-size: .78rem; color: var(--zs-danger); margin-top: 4px; display: none; }
+  .ce-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .btn-ce-submit {
+    flex: 1;
+    padding: 11px;
+    background: var(--zs-violet);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-family: 'Inter', sans-serif;
+    font-size: .9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-ce-submit:hover { background: var(--zs-violet-dark); }
+  .btn-ce-submit:disabled { opacity: .6; cursor: not-allowed; }
+  .btn-ce-cancel {
+    padding: 11px 20px;
+    background: none;
+    border: 1.5px solid var(--zs-border);
+    border-radius: 9px;
+    font-family: 'Inter', sans-serif;
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--zs-muted);
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-ce-cancel:hover { border-color: var(--zs-subtle); color: var(--zs-text); }
 </style>
 {% endblock %}
 
 {% block content %}
+
+<!-- ── Create Event Modal ── -->
+<div class="ce-overlay" id="ceOverlay" onclick="closeCeModal(event)">
+  <div class="ce-modal">
+    <button class="ce-close" onclick="closeCeModalDirect()" title="Close"><i class="bi bi-x-lg"></i></button>
+    <div class="ce-title">Create a New Event</div>
+    <div class="ce-sub">Set up your event and start collecting moments.</div>
+    <form id="ceForm">
+      {% csrf_token %}
+      <div class="ce-field">
+        <label class="ce-label">Name *</label>
+        <input class="ce-input" type="text" name="name" id="ceName" placeholder="e.g. Raj & Priya Wedding" required>
+        <div class="ce-error" id="ceNameErr"></div>
+      </div>
+      <div class="ce-field">
+        <label class="ce-label">Event Date *</label>
+        <input class="ce-input" type="date" name="event_date" id="ceDate" required>
+        <div class="ce-error" id="ceDateErr"></div>
+      </div>
+      <div class="ce-field">
+        <label class="ce-label">Description</label>
+        <textarea class="ce-input" name="description" id="ceDesc" placeholder="Optional description…"></textarea>
+      </div>
+      <div class="ce-actions">
+        <button type="submit" class="btn-ce-submit" id="ceSubmitBtn">
+          <i class="bi bi-check-lg"></i> Create Event
+        </button>
+        <button type="button" class="btn-ce-cancel" onclick="closeCeModalDirect()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- ── Top section ── -->
 <div class="dash-top">
@@ -461,9 +603,9 @@
     <h1>Welcome back, {{ user.username }}</h1>
     <p>Manage your events, photos, and guest experiences.</p>
   </div>
-  <a href="{% url 'event_create' %}" class="btn-create-top">
+  <button onclick="openCeModal()" class="btn-create-top">
     <i class="bi bi-plus-lg"></i> Create Event
-  </a>
+  </button>
 </div>
 
 <!-- ── Stats row ── -->
@@ -607,9 +749,9 @@
   <div class="empty-icon"><i class="bi bi-camera"></i></div>
   <h3>Your events will appear here</h3>
   <p>Create your first event and start collecting moments.</p>
-  <a href="{% url 'event_create' %}" class="btn-create-top">
+  <button onclick="openCeModal()" class="btn-create-top">
     <i class="bi bi-plus-lg"></i> Create Event
-  </a>
+  </button>
 </div>
 {% endif %}
 
@@ -649,6 +791,68 @@ function toggleKebab(evt, btn) {
 }
 document.addEventListener('click', () => {
   document.querySelectorAll('.kebab-menu.open').forEach(m => m.classList.remove('open'));
+});
+
+// ── Create Event Modal ──
+const ceOverlay = document.getElementById('ceOverlay');
+
+function openCeModal() {
+  ceOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('ceName').focus();
+}
+
+function closeCeModalDirect() {
+  ceOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('ceForm').reset();
+  document.querySelectorAll('.ce-error').forEach(el => { el.textContent = ''; el.style.display = 'none'; });
+}
+
+function closeCeModal(e) {
+  if (e.target === ceOverlay) closeCeModalDirect();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && ceOverlay.classList.contains('open')) closeCeModalDirect();
+});
+
+document.getElementById('ceForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('ceSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-arrow-clockwise" style="animation:spin .7s linear infinite;display:inline-block"></i> Creating…';
+
+  const fd = new FormData(this);
+  try {
+    const res = await fetch('{% url "event_create" %}', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': fd.get('csrfmiddlewaretoken'), 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd,
+    });
+    if (res.redirected || res.ok) {
+      const data = res.headers.get('Content-Type')?.includes('json') ? await res.json() : null;
+      if (data && data.slug) {
+        window.location.href = '/dashboard/' + data.slug + '/';
+      } else if (res.redirected) {
+        window.location.href = res.url;
+      } else {
+        window.location.reload();
+      }
+      return;
+    }
+    const data = await res.json();
+    if (data.errors) {
+      Object.entries(data.errors).forEach(([field, msgs]) => {
+        const el = document.getElementById('ce' + field.charAt(0).toUpperCase() + field.slice(1) + 'Err');
+        if (el) { el.textContent = msgs.join(' '); el.style.display = 'block'; }
+      });
+    }
+  } catch(err) {
+    window.location.href = '{% url "event_create" %}';
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="bi bi-check-lg"></i> Create Event';
 });
 
 // ── Client-side event search ──

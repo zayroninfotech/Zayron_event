@@ -1,18 +1,18 @@
 from django import forms
-from .models import Event
-
-_fc = {'class': 'form-control'}
 
 
-class EventForm(forms.ModelForm):
-    class Meta:
-        model = Event
-        fields = ['name', 'event_date', 'description', 'watch_folder']
-        widgets = {
-            'name': forms.TextInput(attrs=_fc),
-            'event_date': forms.DateInput(attrs={**_fc, 'type': 'date'}),
-            'description': forms.Textarea(attrs={**_fc, 'rows': 3}),
-            'watch_folder': forms.TextInput(attrs={**_fc, 'placeholder': 'e.g. C:\\Wedding Photos'}),
-        }
-        labels = {'watch_folder': 'Watch Folder Path (optional)'}
-        help_texts = {'watch_folder': 'Folder path on the agent PC for auto sync'}
+class EventForm(forms.Form):
+    name = forms.CharField(
+        max_length=200,
+        label='Event Name',
+        widget=forms.TextInput(attrs={'placeholder': 'Wedding, Birthday, Conference…'}),
+    )
+    event_date = forms.DateField(
+        label='Event Date',
+        widget=forms.DateInput(attrs={'type': 'date'}),
+    )
+    description = forms.CharField(
+        required=False,
+        label='Description',
+        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Optional notes…'}),
+    )
