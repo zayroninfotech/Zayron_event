@@ -2,7 +2,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
-from events.agent_api import agent_login, agent_events, agent_create_event, agent_upload_photo, agent_stats, agent_history, agent_toggle_sync
+from events.agent_api import agent_login, agent_events, agent_create_event, agent_upload_photo, agent_stats, agent_history, agent_toggle_sync, agent_update_event
 
 urlpatterns = [
     path('accounts/', include('accounts.urls')),
@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/agent/stats/', agent_stats, name='agent_stats'),
     path('api/agent/history/', agent_history, name='agent_history'),
     path('api/agent/toggle-sync/<slug:slug>/', agent_toggle_sync, name='agent_toggle_sync'),
+    path('api/agent/events/<slug:slug>/update/', agent_update_event, name='agent_update_event'),
 ]
 
 if settings.DEBUG:

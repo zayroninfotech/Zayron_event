@@ -141,6 +141,37 @@ def agent_toggle_sync(request, slug):
 
 
 @csrf_exempt
+@require_http_methods(['POST'])
+def agent_update_event(request, slug):
+    user = _token_auth(request)
+    if not user:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    doc = mongo_store.get_event_by_slug(slug)
+    if not doc or doc.get('created_by_id') != user.pk:
+        return JsonResponse({'error': 'Event not found'}, status=404)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    event = Event(doc)
+    update_fields = []
+    if 'watch_folder' in data:
+        event.watch_folder = str(data['watch_folder'])
+        update_fields.append('watch_folder')
+    if 'agent_sync_enabled' in data:
+        event.agent_sync_enabled = bool(data['agent_sync_enabled'])
+        update_fields.append('agent_sync_enabled')
+    if update_fields:
+        event.save(update_fields=update_fields)
+    return JsonResponse({
+        'success': True,
+        'slug': slug,
+        'watch_folder': event.watch_folder,
+        'agent_sync_enabled': event.agent_sync_enabled,
+    })
+
+
+@csrf_exempt
 @require_http_methods(['GET'])
 def agent_stats(request):
     user = _token_auth(request)
