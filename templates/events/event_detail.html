@@ -1223,7 +1223,10 @@ async function startUpload(files) {
         if (!res.ok) throw new Error();
         const data = await res.json();
         done += data.uploaded;
-        if (data.photos) newPhotos.push(...data.photos);
+        if (data.photos && data.photos.length) {
+          newPhotos.push(...data.photos);
+          injectPhotoTiles(data.photos);
+        }
       } catch {
         failed += chunk.length;
       }
@@ -1239,8 +1242,7 @@ async function startUpload(files) {
     totalUploaded += done;
     totalFailed   += failed;
 
-    // Inject new photo tiles into the grid
-    if (newPhotos.length) injectPhotoTiles(newPhotos);
+    // tiles already injected per-chunk above
   }
 
   // All queued files done
