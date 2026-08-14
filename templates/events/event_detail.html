@@ -998,6 +998,7 @@
         </span>
 
         <div class="photo-overlay" onclick="event.stopPropagation()">
+          {% if photo.pk %}
           <a href="{% url 'download_event_photo' photo.pk %}" class="dl-btn" title="Download photo"
              data-no-loadbar="true" onclick="return downloadSinglePhoto(event, this)">
             <i class="bi bi-download"></i>
@@ -1009,6 +1010,7 @@
               <i class="bi bi-trash"></i>
             </button>
           </form>
+          {% endif %}
         </div>
       </div>
     </div>
