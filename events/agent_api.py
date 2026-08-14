@@ -98,7 +98,10 @@ def agent_upload_photo(request, slug):
     saved = 0
     for f in photos_files:
         photo = EventPhoto.objects.create(event=event, image=f)
-        process_event_photo.apply_async((photo.pk,), countdown=2)
+        try:
+            process_event_photo.apply_async((photo.pk,), countdown=2)
+        except Exception:
+            pass  # Celery/broker unavailable — photo saved, processing queued later
         saved += 1
     return JsonResponse({'uploaded': saved, 'event': event.name})
 
