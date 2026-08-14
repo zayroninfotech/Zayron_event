@@ -849,7 +849,8 @@ document.getElementById('ceForm').addEventListener('submit', async function(e) {
       });
     }
   } catch(err) {
-    window.location.href = '{% url "event_create" %}';
+    const el = document.getElementById('ceNameErr');
+    if (el) { el.textContent = 'Could not reach server. Please try again.'; el.style.display = 'block'; }
   }
   btn.disabled = false;
   btn.innerHTML = '<i class="bi bi-check-lg"></i> Create Event';
