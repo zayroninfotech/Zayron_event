@@ -27,7 +27,8 @@
     body {
       font-family: 'Inter', system-ui, sans-serif;
       color: var(--text);
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
       display: flex;
       background: #F0F2FF;
     }
@@ -39,9 +40,10 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 48px 52px;
+      padding: 36px 48px;
       position: relative;
       overflow: hidden;
+      height: 100vh;
     }
 
     /* Background blobs */
@@ -191,6 +193,8 @@
       align-items: center;
       justify-content: center;
       padding: 40px 24px;
+      height: 100vh;
+      overflow-y: auto;
     }
 
     .auth-card {
