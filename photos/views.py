@@ -62,9 +62,8 @@ def bulk_upload(request, slug):
     created = []
     for f in files:
         photo = EventPhoto.objects.create(event=event, image=f)
-        _make_thumbnail_safe(photo)
         created.append(photo.pk)
-        process_event_photo.apply_async((photo.pk,), countdown=2)
+        process_event_photo.apply_async((photo.pk,))
 
     if is_ajax:
         photos_data = []

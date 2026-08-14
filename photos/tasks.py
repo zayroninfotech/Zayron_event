@@ -28,6 +28,23 @@ def process_event_photo(self, photo_id: int):
     except EventPhoto.DoesNotExist:
         return
 
+    if not photo._thumbnail_name:
+        try:
+            import io as _io
+            from PIL import Image as _Image
+            import pathlib, django.conf
+            with _Image.open(photo.image.path) as img:
+                img.thumbnail((400, 400), _Image.LANCZOS)
+                buf = _io.BytesIO()
+                img.save(buf, format='JPEG', quality=80)
+                thumb_name = f'event_photos/{photo.event_slug}/thumbs/thumb_{photo.pk}.jpg'
+                thumb_path = pathlib.Path(django.conf.settings.MEDIA_ROOT) / thumb_name
+                thumb_path.parent.mkdir(parents=True, exist_ok=True)
+                thumb_path.write_bytes(buf.getvalue())
+                mongo_store.update_photo(photo_id, {'thumbnail': thumb_name})
+        except Exception:
+            pass
+
     if photo.processed:
         return
 
