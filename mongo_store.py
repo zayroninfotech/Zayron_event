@@ -125,8 +125,8 @@ def update_event(event_id: int, data: dict):
 
 
 def delete_event(event_id: int):
-    photo_ids = [p['id'] for p in photos_col().find({'event_id': event_id}, {'id': 1})]
-    guest_ids = [g['id'] for g in guests_col().find({'event_id': event_id}, {'id': 1})]
+    photo_ids = [p['id'] for p in photos_col().find({'event_id': event_id}, {'id': 1}) if p.get('id') is not None]
+    guest_ids = [g['id'] for g in guests_col().find({'event_id': event_id}, {'id': 1}) if g.get('id') is not None]
     events_col().delete_one({'id': event_id})
     photos_col().delete_many({'event_id': event_id})
     guests_col().delete_many({'event_id': event_id})
