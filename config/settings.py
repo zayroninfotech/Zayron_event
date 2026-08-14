@@ -14,6 +14,11 @@ environ.Env.read_env(BASE_DIR / '.env')
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-change-me-in-production')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[]) or [
+    f'http://{h}' for h in ALLOWED_HOSTS if h != '*'
+] + [
+    f'https://{h}' for h in ALLOWED_HOSTS if h != '*'
+]
 
 INSTALLED_APPS = [
     'django.contrib.auth',

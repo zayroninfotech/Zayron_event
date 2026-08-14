@@ -7,7 +7,7 @@
   <title>Sign In — ZayroSnap</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,7 +20,6 @@
       --muted:       rgba(23,32,51,.60);
       --subtle:      rgba(23,32,51,.40);
       --border:      #E7E9F0;
-      --bg:          #F7F8FC;
       --danger:      #EF4444;
       --danger-lt:   #FEE2E2;
     }
@@ -30,51 +29,189 @@
       color: var(--text);
       min-height: 100vh;
       display: flex;
+      background: #F0F2FF;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      width: 52%;
+      background: linear-gradient(145deg, #1a1060 0%, #2d1b8e 40%, #635BEB 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 52px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background blobs */
+    .left-panel::before {
+      content: '';
+      position: absolute;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+      top: -120px; right: -120px;
+    }
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.05);
+      bottom: -80px; left: -60px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 1;
+    }
+    .brand-icon {
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,.15);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,.2);
+    }
+    .brand-icon i { font-size: 1.3rem; color: #fff; }
+    .brand-name {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -.3px;
+    }
+    .brand-name span { color: rgba(255,255,255,.55); font-weight: 500; }
+
+    .left-content {
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: .78rem;
+      font-weight: 600;
+      color: rgba(255,255,255,.85);
+      margin-bottom: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .hero-badge i { font-size: .75rem; color: #A5F3FC; }
+
+    .hero-title {
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.15;
+      letter-spacing: -.6px;
+      margin-bottom: 16px;
+    }
+    .hero-title span {
+      background: linear-gradient(90deg, #A5F3FC, #818CF8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: .95rem;
+      color: rgba(255,255,255,.65);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 360px;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .feature-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.15);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .feature-icon i { font-size: 1rem; color: #A5F3FC; }
+    .feature-text { font-size: .88rem; color: rgba(255,255,255,.75); line-height: 1.4; }
+    .feature-text strong { color: #fff; font-weight: 600; display: block; font-size: .9rem; }
+
+    /* Photo preview strip */
+    .photo-strip {
+      display: flex;
+      gap: 8px;
+      z-index: 1;
+    }
+    .photo-chip {
+      flex: 1;
+      height: 56px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.15);
+      display: flex;
       align-items: center;
       justify-content: center;
-      background: #F0F2FF;
+      backdrop-filter: blur(4px);
+    }
+    .photo-chip i { font-size: 1.2rem; color: rgba(255,255,255,.5); }
+    .photo-chip.active {
+      background: rgba(99,91,235,.4);
+      border-color: rgba(99,91,235,.6);
+    }
+    .photo-chip.active i { color: #fff; }
+
+    .strip-label {
+      font-size: .75rem;
+      color: rgba(255,255,255,.4);
+      text-align: center;
+      margin-top: 10px;
+      z-index: 1;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
     }
 
     .auth-card {
       width: 100%;
       max-width: 400px;
-      background: #fff;
-      border-radius: 24px;
-      box-shadow: 0 8px 40px rgba(99,91,235,.10), 0 2px 8px rgba(23,32,51,.06);
-      padding: 44px 40px 36px;
-      margin: 24px 16px;
-      text-align: center;
     }
 
-    /* Avatar icon */
-    .avatar-wrap {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: linear-gradient(145deg, #7C6CF6, #635BEB);
-      display: grid;
-      place-items: center;
-      margin: 0 auto 24px;
-      box-shadow: 0 4px 18px rgba(99,91,235,.35);
+    .card-header {
+      margin-bottom: 32px;
     }
-    .avatar-wrap i {
-      font-size: 1.9rem;
-      color: #fff;
-    }
-
-    .form-heading {
+    .card-header h2 {
       font-size: 1.75rem;
       font-weight: 800;
       color: var(--text);
       letter-spacing: -.4px;
       margin-bottom: 6px;
     }
-    .form-heading span { color: var(--violet); }
-
-    .form-subheading {
+    .card-header h2 span { color: var(--violet); }
+    .card-header p {
       font-size: .875rem;
       color: var(--muted);
-      margin-bottom: 32px;
     }
 
     /* Error box */
@@ -89,17 +226,16 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      text-align: left;
     }
 
     /* Fields */
-    .field-group { margin-bottom: 16px; text-align: left; }
+    .field-group { margin-bottom: 18px; }
     .field-label {
       display: block;
       font-size: .82rem;
       font-weight: 600;
       color: var(--text);
-      margin-bottom: 6px;
+      margin-bottom: 7px;
     }
     .input-wrap { position: relative; }
     .input-icon {
@@ -113,13 +249,13 @@
     }
     .zs-input {
       width: 100%;
-      padding: 11px 40px 11px 38px;
+      padding: 12px 40px 12px 38px;
       border: 1.5px solid var(--border);
       border-radius: 10px;
       font-family: 'Inter', sans-serif;
       font-size: .9rem;
       color: var(--text);
-      background: #FAFAFA;
+      background: #FAFBFF;
       outline: none;
       transition: border-color .15s, box-shadow .15s, background .15s;
     }
@@ -131,7 +267,6 @@
     .zs-input::placeholder { color: var(--subtle); }
     .field-error { font-size: .78rem; color: var(--danger); margin-top: 5px; }
 
-    /* Password toggle */
     .pw-toggle {
       position: absolute;
       right: 11px;
@@ -147,7 +282,6 @@
     }
     .pw-toggle:hover { color: var(--muted); }
 
-    /* Options row */
     .form-options {
       display: flex;
       align-items: center;
@@ -164,19 +298,11 @@
       user-select: none;
     }
     .remember-label input { accent-color: var(--violet); }
-    .forgot-link {
-      font-size: .82rem;
-      color: var(--violet);
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .forgot-link:hover { text-decoration: underline; }
 
-    /* Submit */
     .btn-signin {
       width: 100%;
       padding: 13px;
-      background: var(--violet);
+      background: linear-gradient(135deg, #7C6CF6, #635BEB);
       color: #fff;
       border: none;
       border-radius: 10px;
@@ -188,94 +314,179 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: background .15s, transform .1s, box-shadow .15s;
-      box-shadow: 0 4px 14px rgba(99,91,235,.30);
+      transition: opacity .15s, transform .1s, box-shadow .15s;
+      box-shadow: 0 4px 18px rgba(99,91,235,.35);
+      letter-spacing: .2px;
     }
-    .btn-signin:hover { background: var(--violet-dark); box-shadow: 0 6px 20px rgba(99,91,235,.38); }
+    .btn-signin:hover { opacity: .92; box-shadow: 0 6px 24px rgba(99,91,235,.45); }
     .btn-signin:active { transform: scale(.99); }
     .btn-signin:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
-    .register-prompt {
-      text-align: center;
-      margin-top: 20px;
-      font-size: .85rem;
-      color: var(--muted);
+    /* Trust badges */
+    .trust-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
     }
-    .register-prompt a {
-      color: var(--violet);
-      font-weight: 600;
-      text-decoration: none;
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: .75rem;
+      color: var(--subtle);
     }
-    .register-prompt a:hover { text-decoration: underline; }
+    .trust-item i { font-size: .8rem; color: #22C55E; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { animation: spin .7s linear infinite; display: inline-block; }
 
-    @media (max-width: 440px) {
-      .auth-card { padding: 36px 24px 28px; }
-      .form-heading { font-size: 1.5rem; }
+    /* Responsive */
+    @media (max-width: 860px) {
+      body { flex-direction: column; }
+      .left-panel {
+        width: 100%;
+        padding: 36px 32px;
+        min-height: auto;
+      }
+      .hero-title { font-size: 2rem; }
+      .feature-list { flex-direction: row; flex-wrap: wrap; gap: 10px; }
+      .photo-strip, .strip-label { display: none; }
+    }
+    @media (max-width: 520px) {
+      .left-panel { padding: 28px 20px; }
+      .right-panel { padding: 32px 16px; }
+      .feature-list { display: none; }
     }
   </style>
 </head>
 <body>
 
-<div class="auth-card">
-
-  <div class="avatar-wrap">
-    <i class="bi bi-person"></i>
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="brand-logo">
+    <div class="brand-icon"><i class="bi bi-camera2"></i></div>
+    <div class="brand-name">Zayro<span>Snap</span></div>
   </div>
 
-  <h1 class="form-heading">Welcome <span>back</span></h1>
-  <p class="form-subheading">Sign in to your organizer account</p>
-
-  <form method="post" id="loginForm">
-    {% csrf_token %}
-
-    {% if form.non_field_errors %}
-    <div class="error-box">
-      <i class="bi bi-exclamation-circle"></i>
-      <span>{{ form.non_field_errors }}</span>
+  <div class="left-content">
+    <div class="hero-badge">
+      <i class="bi bi-stars"></i>
+      AI-Powered Event Photography
     </div>
-    {% endif %}
+    <h1 class="hero-title">Your Events,<br><span>Perfectly Captured</span></h1>
+    <p class="hero-desc">Upload event photos, let AI find every face, and deliver personalized galleries to every guest — instantly.</p>
 
-    <!-- Username -->
-    <div class="field-group">
-      <label class="field-label" for="id_username">Username</label>
-      <div class="input-wrap">
-        <i class="bi bi-person input-icon"></i>
-        <input class="zs-input" type="text" id="id_username" name="username"
-               placeholder="Enter your username"
-               value="{{ form.username.value|default:'' }}"
-               autocomplete="username" autofocus>
+    <div class="feature-list">
+      <div class="feature-item">
+        <div class="feature-icon"><i class="bi bi-cpu"></i></div>
+        <div class="feature-text">
+          <strong>Face Recognition AI</strong>
+          ArcFace technology matches guests to their photos automatically
+        </div>
       </div>
-      {% if form.username.errors %}
-      <div class="field-error">{{ form.username.errors }}</div>
-      {% endif %}
-    </div>
-
-    <!-- Password -->
-    <div class="field-group">
-      <label class="field-label" for="id_password">Password</label>
-      <div class="input-wrap">
-        <i class="bi bi-lock input-icon"></i>
-        <input class="zs-input" type="password" id="id_password" name="password"
-               placeholder="••••••••" autocomplete="current-password">
-        <button type="button" class="pw-toggle" onclick="togglePassword()" title="Show / hide password">
-          <i class="bi bi-eye-slash" id="eyeIcon"></i>
-        </button>
+      <div class="feature-item">
+        <div class="feature-icon"><i class="bi bi-cloud-upload"></i></div>
+        <div class="feature-text">
+          <strong>Auto-Sync Agent</strong>
+          Desktop agent watches your folder and uploads photos in real time
+        </div>
       </div>
-      {% if form.password.errors %}
-      <div class="field-error">{{ form.password.errors }}</div>
-      {% endif %}
+      <div class="feature-item">
+        <div class="feature-icon"><i class="bi bi-people"></i></div>
+        <div class="feature-text">
+          <strong>Guest Self-Search</strong>
+          Guests upload a selfie and instantly receive all their photos
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="photo-strip">
+      <div class="photo-chip active"><i class="bi bi-image"></i></div>
+      <div class="photo-chip active"><i class="bi bi-person-check"></i></div>
+      <div class="photo-chip"><i class="bi bi-image"></i></div>
+      <div class="photo-chip"><i class="bi bi-image"></i></div>
+      <div class="photo-chip active"><i class="bi bi-person-check"></i></div>
+      <div class="photo-chip"><i class="bi bi-image"></i></div>
+    </div>
+    <div class="strip-label">Photos matched by AI face recognition</div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="auth-card">
+
+    <div class="card-header">
+      <h2>Welcome <span>back</span></h2>
+      <p>Sign in to your organizer account</p>
     </div>
 
-    <!-- Submit -->
-    <button type="submit" class="btn-signin" id="loginBtn">
-      Sign In <i class="bi bi-arrow-right"></i>
-    </button>
-  </form>
+    <form method="post" id="loginForm">
+      {% csrf_token %}
 
+      {% if form.non_field_errors %}
+      <div class="error-box">
+        <i class="bi bi-exclamation-circle"></i>
+        <span>{{ form.non_field_errors }}</span>
+      </div>
+      {% endif %}
 
+      <!-- Username -->
+      <div class="field-group">
+        <label class="field-label" for="id_username">Username</label>
+        <div class="input-wrap">
+          <i class="bi bi-person input-icon"></i>
+          <input class="zs-input" type="text" id="id_username" name="username"
+                 placeholder="Enter your username"
+                 value="{{ form.username.value|default:'' }}"
+                 autocomplete="username" autofocus>
+        </div>
+        {% if form.username.errors %}
+        <div class="field-error">{{ form.username.errors }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Password -->
+      <div class="field-group">
+        <label class="field-label" for="id_password">Password</label>
+        <div class="input-wrap">
+          <i class="bi bi-lock input-icon"></i>
+          <input class="zs-input" type="password" id="id_password" name="password"
+                 placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="pw-toggle" onclick="togglePassword()" title="Show / hide password">
+            <i class="bi bi-eye-slash" id="eyeIcon"></i>
+          </button>
+        </div>
+        {% if form.password.errors %}
+        <div class="field-error">{{ form.password.errors }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Options -->
+      <div class="form-options">
+        <label class="remember-label">
+          <input type="checkbox" name="remember"> Remember me
+        </label>
+      </div>
+
+      <button type="submit" class="btn-signin" id="loginBtn">
+        Sign In &nbsp;<i class="bi bi-arrow-right"></i>
+      </button>
+    </form>
+
+    <div class="trust-row">
+      <div class="trust-item"><i class="bi bi-shield-check"></i> Secure Login</div>
+      <div class="trust-item"><i class="bi bi-lock"></i> Encrypted</div>
+      <div class="trust-item"><i class="bi bi-check-circle"></i> Verified</div>
+    </div>
+
+  </div>
 </div>
 
 <script>
