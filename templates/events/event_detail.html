@@ -1064,8 +1064,8 @@
 const SLUG       = '{{ event.slug }}';
 const UPLOAD_URL = '{% url "bulk_upload" event.slug %}';
 const CSRF       = '{{ csrf_token }}';
-const CHUNK_SIZE   = 10;  // photos per batch
-const CONCURRENCY  = 3;   // batches uploading in parallel
+const CHUNK_SIZE   = 1;   // 1 photo per request — counter updates after every photo
+const CONCURRENCY  = 5;   // 5 photos uploading in parallel
 
 // ── Download with spinner (fetch → blob → save) ──
 function extractFilename(res, fallback) {
