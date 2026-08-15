@@ -1258,6 +1258,9 @@ async function startUpload(files) {
   const tCount = document.getElementById('totalCount');
   if (tCount) tCount.textContent = parseInt(tCount.textContent || 0) + totalUploaded;
 
+  // Auto-start indexing poll for newly uploaded photos
+  startPoll();
+
   setTimeout(() => {
     statusBox.style.display = 'none';
     fill.style.width  = '0%';
@@ -1322,10 +1325,19 @@ function injectPhotoTiles(photos) {
 }
 
 // ── Processing poll ──
+let _polling = false;
+
+function startPoll() {
+  if (_polling) return;
+  _polling = true;
+  setTimeout(pollProcessing, 3000);
+}
+
 function pollProcessing() {
   fetch(`/photos/${SLUG}/status/`)
     .then(r => r.json())
     .then(data => {
+      // Stats strip
       const badge = document.getElementById('processedBadge');
       if (badge) badge.textContent = `${data.processed}/${data.total}`;
 
@@ -1335,21 +1347,48 @@ function pollProcessing() {
       const tCount = document.getElementById('totalCount');
       if (tCount) tCount.textContent = data.total;
 
+      // Progress bar
       const fill = document.getElementById('progressFill');
       if (fill && data.total > 0) fill.style.width = Math.round(data.processed / data.total * 100) + '%';
+
+      // Progress bar header count
+      const procCount = document.querySelector('.proc-count');
+      if (procCount) procCount.textContent = `${data.processed}/${data.total}`;
 
       const txt = document.getElementById('procStatusText');
       if (txt) txt.textContent = data.processed < data.total
         ? `Indexing… ${data.processed} of ${data.total} done`
         : `All ${data.total} photos indexed`;
 
-      if (data.processed < data.total) setTimeout(pollProcessing, 5000);
+      // Update individual tile face badges
+      if (data.photos && data.photos.length) {
+        data.photos.forEach(p => {
+          const tile = document.querySelector(`.photo-tile[data-id="${p.id}"]`);
+          if (!tile) return;
+          const badge = tile.querySelector('.face-badge');
+          if (!badge) return;
+          if (!p.processed) return; // still indexing
+          if (p.face_count > 0) {
+            badge.className = 'face-badge faces';
+            badge.innerHTML = `${p.face_count} face${p.face_count !== 1 ? 's' : ''}`;
+          } else {
+            badge.className = 'face-badge done';
+            badge.innerHTML = '<i class="bi bi-check"></i>';
+          }
+        });
+      }
+
+      if (data.processed < data.total) {
+        setTimeout(pollProcessing, 4000);
+      } else {
+        _polling = false;
+      }
     })
     .catch(() => setTimeout(pollProcessing, 8000));
 }
 
 {% if event.processed_photos < event.total_photos %}
-setTimeout(pollProcessing, 5000);
+startPoll();
 {% endif %}
 
 // ── Agent Sync Toggle ──
