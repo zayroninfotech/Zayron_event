@@ -473,7 +473,12 @@ if (['done', 'no_face', 'failed'].includes(INITIAL_STATUS)) {
       .then(r => r.json())
       .then(data => {
         if (data.terminal) {
-          handleStatus(data.status, data.match_count || 0);
+          if (data.status === 'done') {
+            // Reload so Django renders the photo grid with real matches
+            window.location.reload();
+          } else {
+            handleStatus(data.status, data.match_count || 0);
+          }
         } else {
           pollCount++;
           setTimeout(poll, pollCount < 6 ? 3000 : 5000);
