@@ -45,7 +45,8 @@ def process_event_photo(self, photo_id: int):
         except Exception:
             pass
 
-    if photo.processed:
+    # Skip only if truly processed with actual face data (not the empty fallback)
+    if photo.processed and (photo.face_count > 0 or photo.face_encodings):
         return
 
     try:
