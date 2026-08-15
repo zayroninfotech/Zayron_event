@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -137,7 +138,12 @@
       font-size: .72rem;
       color: #a0aec0;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
     }
+    footer img.co-logo { height: 36px; width: auto; object-fit: contain; }
     footer a { color: #635BEB; text-decoration: none; }
   </style>
 </head>
@@ -173,7 +179,10 @@
   </form>
 </div>
 
-<footer>Powered by <a href="#">ZayroSnap</a> &mdash; <strong>Zayron Infotech Pvt. Ltd</strong></footer>
+<footer>
+  <img src="{% static 'img/logo1_cropped.png' %}" alt="Zayron Infotech" class="co-logo">
+  Powered by <a href="#">ZayroSnap</a> &mdash; <strong>Zayron Infotech Pvt. Ltd</strong>
+</footer>
 
 <script>
 function previewSelfie(input) {
