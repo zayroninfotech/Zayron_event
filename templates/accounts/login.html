@@ -151,37 +151,6 @@
     .feature-text { font-size: .88rem; color: rgba(255,255,255,.85); line-height: 1.4; }
     .feature-text strong { color: #fff; font-weight: 600; display: block; font-size: .9rem; }
 
-    /* Photo preview strip */
-    .photo-strip {
-      display: flex;
-      gap: 8px;
-      z-index: 1;
-    }
-    .photo-chip {
-      flex: 1;
-      height: 56px;
-      border-radius: 10px;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(4px);
-    }
-    .photo-chip i { font-size: 1.2rem; color: rgba(255,255,255,.5); }
-    .photo-chip.active {
-      background: rgba(0,229,255,.15);
-      border-color: rgba(0,229,255,.5);
-    }
-    .photo-chip.active i { color: #fff; }
-
-    .strip-label {
-      font-size: .75rem;
-      color: rgba(255,255,255,.4);
-      text-align: center;
-      margin-top: 10px;
-      z-index: 1;
-    }
 
     /* ── RIGHT PANEL ── */
     .right-panel {
@@ -357,7 +326,7 @@
       }
       .hero-title { font-size: 1.7rem; }
       .hero-desc { margin-bottom: 0; font-size: .85rem; }
-      .feature-list, .photo-strip, .strip-label { display: none; }
+      .feature-list { display: none; }
       .right-panel { height: auto; padding: 32px 24px; }
     }
     @media (max-width: 520px) {
@@ -409,17 +378,6 @@
     </div>
   </div>
 
-  <div>
-    <div class="photo-strip">
-      <div class="photo-chip active"><i class="bi bi-image"></i></div>
-      <div class="photo-chip active"><i class="bi bi-person-check"></i></div>
-      <div class="photo-chip"><i class="bi bi-image"></i></div>
-      <div class="photo-chip"><i class="bi bi-image"></i></div>
-      <div class="photo-chip active"><i class="bi bi-person-check"></i></div>
-      <div class="photo-chip"><i class="bi bi-image"></i></div>
-    </div>
-    <div class="strip-label">Photos matched by AI face recognition</div>
-  </div>
 </div>
 
 <!-- RIGHT PANEL -->
